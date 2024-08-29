@@ -4,12 +4,16 @@ def start_server(host='localhost', port=8080):
     # criando um socket
     socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
+    #AFI_INET - para endereços de redes ipv4
+    #SOCK_STREAM - para o protocolo de transmissão de dados TCP
+
+
     # associando o socket ao endereço da porta 
     socket_server.bind((host, port))
     
     # inicia o servidor para aceitar conexões
     socket_server.listen(5)
-    print(f"ouvindo em {host} : {port}")
+    print(f"disponivel em {host} : {port}")
 
     while True:
         # aceita a conexão

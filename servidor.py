@@ -1,7 +1,7 @@
 import socket
 import pickle
 
-def start_server(host='localhost', port=8080):
+def start_server(host='172.16.103.226', port=1080):
     # criando um socket
     socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     

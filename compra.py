@@ -31,7 +31,22 @@ class Compra:
 
         return (origem_str,destino_str)
 
+class Cidade:
+
+   def __init__(self,nome: str,estado:str,id:str):
+       self.nome = nome
+       self.estado = estado
+       self.id = id
     
+class Trecho:
+
+    def __init__(self,origem:Cidade,destino:Cidade,id:str):
+
+        self.origem = origem
+        self.destino = destino 
+        self.id = id
+
+
 
 
 def main():

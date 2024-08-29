@@ -4,14 +4,14 @@ import pickle
 import os
 from datetime import datetime
 
-def start_client(host='localhost', port=8080):
+def start_client(host='172.16.103.226', port=1080):
     # cria um socket TCP
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     # conecta ao servidor
     client_socket.connect((host, port))
 
-    teste = compra.Compra("Gabriel",1,[("sao_paulo","bahia")],datetime.now())
+    teste = compra.Compra("Gabriel",1,[("sao_paulo","bahia")],datetime.now()) #objeto teste
     obj = pickle.dumps(teste)
     
     # envia uma mensagem para o servidor
@@ -25,9 +25,6 @@ def start_client(host='localhost', port=8080):
     
     # fecha a conexão
     client_socket.close()
-
-
-
 
 
 
@@ -55,7 +52,7 @@ def ver_trechos():
     print("Aqui você pode visualizar os trechos disponíveis.")
     input("\nPressione Enter para voltar ao menu principal...")
 
-def compra():
+def compra_menu():
     """Simula o processo de compra."""
     limpar_tela()
     print("="*30)
@@ -74,7 +71,7 @@ def menu():
         if escolha == '1':
             ver_trechos()
         elif escolha == '2':
-            compra()
+            compra_menu()
         elif escolha == '3':
             limpar_tela()
             print("="*30)
@@ -88,6 +85,14 @@ def menu():
             print("="*30)
             input("\nPressione Enter para continuar...")
 
-if __name__ == "__main__":
-    menu()
+    return escolha
+
+def main():
     start_client()
+    
+    menu()
+    
+   
+
+if __name__ == "__main__":
+    main()
