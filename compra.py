@@ -10,7 +10,7 @@ class Compra:
         self.trecho = trecho
         self.data = data
     
-    def definir_trecho(origem:int,destino:int) -> tuple:
+    def definir_trecho(self, origem:int,destino:int) -> tuple:
         
         origem_str = ''
         destino_str = ''
