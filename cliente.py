@@ -8,44 +8,6 @@ def start_client(host='localhost', port=1080):
     # cria um socket TCP
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # conecta ao servidor
-    client_socket.connect((host, port))
-    cidades_com_aeroporto = [
-        "São Paulo, SP",
-        "Rio de Janeiro, RJ",
-        "Brasília, DF",
-        "Salvador, BA",
-        "Fortaleza, CE",
-        "Belo Horizonte, MG",
-        "Recife, PE",
-        "Porto Alegre, RS",
-        "Curitiba, PR",
-        "Manaus, AM",
-        "Belém, PA",
-        "Goiânia, GO",
-        "Vitória, ES",
-        "Florianópolis, SC",
-        "Maceió, AL",
-        "Natal, RN",
-        "São Luís, MA",
-        "Cuiabá, MT",
-        "Aracaju, SE",
-        "Campo Grande, MS"
-    ]
-
-    # Lista para armazenar as instâncias da classe Cidade
-    cidades_objetos = []
-
-    # Loop para criar instâncias da classe Cidade e adicionar à lista
-    for i, cidade_estado in enumerate(cidades_com_aeroporto):
-        nome, estado = cidade_estado.split(", ")
-        cidade_itr = compra.Cidade(nome, estado, str(i + 1))  # Atribuindo o ID como um índice sequencial
-        cidades_objetos.append(cidade_itr)
-
-    # Exemplo de como acessar os atributos das instâncias criadas
-
-    print(f"ID: {cidade_itr.id}, Nome: {cidade_itr.nome}, Estado: {cidade_itr.estado}")
-    client_socket.send(pickle.dumps(cidades_objetos))
     response = client_socket.recv(1024).decode()
     print(f"Server response: {response}")
     # envia uma mensagem para o servidor
