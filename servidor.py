@@ -1,101 +1,127 @@
 import socket
 import pickle
 
+def retornar_trechos():
+    trechos_viagem = {
+    "São Paulo, SP": {
+        "Rio de Janeiro, RJ": {"distancia": 430, "vagas": 5, "preco": 120},
+        "Belo Horizonte, MG": {"distancia": 586, "vagas": 8, "preco": 150}
+    },
+    "Rio de Janeiro, RJ": {
+        "São Paulo, SP": {"distancia": 430, "vagas": 5, "preco": 120},
+        "Brasília, DF": {"distancia": 1148, "vagas": 0, "preco": 250}
+    },
+    "Brasília, DF": {
+        "Rio de Janeiro, RJ": {"distancia": 1148, "vagas": 0, "preco": 250},
+        "Salvador, BA": {"distancia": 1440, "vagas": 6, "preco": 300}
+    },
+    "Salvador, BA": {
+        "Brasília, DF": {"distancia": 1440, "vagas": 6, "preco": 300},
+        "Fortaleza, CE": {"distancia": 1023, "vagas": 4, "preco": 220}
+    },
+    "Fortaleza, CE": {
+        "Salvador, BA": {"distancia": 1023, "vagas": 4, "preco": 220},
+        "Recife, PE": {"distancia": 800, "vagas": 10, "preco": 180}
+    },
+    "Belo Horizonte, MG": {
+        "São Paulo, SP": {"distancia": 586, "vagas": 8, "preco": 150},
+        "Porto Alegre, RS": {"distancia": 1712, "vagas": 7, "preco": 400}
+    },
+    "Recife, PE": {
+        "Fortaleza, CE": {"distancia": 800, "vagas": 10, "preco": 180},
+        "Manaus, AM": {"distancia": 2714, "vagas": 2, "preco": 600}
+    },
+    "Porto Alegre, RS": {
+        "Belo Horizonte, MG": {"distancia": 1712, "vagas": 7, "preco": 400},
+        "Curitiba, PR": {"distancia": 711, "vagas": 9, "preco": 100}
+    },
+    "Curitiba, PR": {
+        "Porto Alegre, RS": {"distancia": 711, "vagas": 9, "preco": 100},
+        "São Paulo, SP": {"distancia": 408, "vagas": 5, "preco": 90}
+    },
+    "Manaus, AM": {
+        "Recife, PE": {"distancia": 2714, "vagas": 2, "preco": 600},
+        "Brasília, DF": {"distancia": 1930, "vagas": 6, "preco": 500}
+    }
+    }
+    return trechos_viagem
 
 def compra(trechos, rotas, id_viagem):
     diminuir_vagas(trechos, rotas[id_viagem])
 
-def diminuir_vagas(trechos, rota):
-    # Percorre o caminho (rota), de uma cidade para a próxima
+    # Grafo de trechos de viagem com distâncias, vagas e preços
+
+# Função 1: Diminui o número de vagas em uma rota
+def diminuir_vagas(grafo, rota):
     for i in range(len(rota) - 1):
         cidade_atual = rota[i]
         proxima_cidade = rota[i + 1]
 
-        # Verifica se existe o trecho no grafo e se há vagas
-        if trechos[cidade_atual][proxima_cidade]["vagas"] > 0:
-            # Diminui o número de vagas em 1
-            trechos[cidade_atual][proxima_cidade]["vagas"] -= 1
-            # Como o grafo é bidirecional, diminui o número de vagas no caminho inverso também
-            trechos[proxima_cidade][cidade_atual]["vagas"] -= 1
+        if grafo[cidade_atual][proxima_cidade]["vagas"] > 0:
+            # Reduz uma vaga tanto na ida quanto na volta
+            grafo[cidade_atual][proxima_cidade]["vagas"] -= 1
+            grafo[proxima_cidade][cidade_atual]["vagas"] -= 1
         else:
             print(f"Sem vagas disponíveis entre {cidade_atual} e {proxima_cidade}.")
 
-def mostrar_possibilidades(origem, destino):
-    rotas = busca_possibilidades(origem, destino)
-    for id_rota, rota in rotas.items():
-        print(f"Rota {id_rota}: {' -> '.join(rota)}")
+# Função 2: Calcula o preço total de uma rota
+def calcular_preco_total(grafo, rota):
+    custo_total = 0
+    for i in range(len(rota) - 1):
+        cidade_atual = rota[i]
+        proxima_cidade = rota[i + 1]
+        custo_total += grafo[cidade_atual][proxima_cidade]["preco"]
+    return custo_total
 
-def busca_possibilidades(origem, destino):
-    trechos = definir_rotas()
-    rotas = {}  # Dicionário para armazenar as rotas com ID
-    id_rota = 1  # ID inicial para as rotas
+# Função 3: Busca todas as possibilidades de rotas de origem a destino
+def busca_todos_caminhos(trechos, origem, destino):
+    caminhos_encontrados = {}  # Dicionário para armazenar os resultados
+    caminho_id = 1  # ID inicial para as rotas
 
-    # Função para realizar a busca em profundidade
-    def dfs(cidade_atual, caminho):
-        nonlocal id_rota
-        caminho.append(cidade_atual)
+    def dfs(origem, destino, visitado=None, caminho_atual=None, custo_atual=0):
+        nonlocal caminho_id
+        if visitado is None:
+            visitado = set()  # Mantém registro das cidades já visitadas
+        if caminho_atual is None:
+            caminho_atual = []  # Mantém o caminho atual
 
-        # Se chegamos ao destino, armazena o caminho
-        if cidade_atual == destino:
-            rotas[id_rota] = caminho
-            id_rota += 1
-        else:
-            # Para cada vizinho da cidade atual
-            for vizinho, info in trechos[cidade_atual].items():
-                # Se o número de vagas for maior que zero e o vizinho não tiver sido visitado
-                if info["vagas"] > 0 and vizinho not in caminho:
-                    dfs(vizinho, caminho[:])  # Chamada recursiva com uma cópia do caminho
+        # Adiciona a cidade atual ao caminho
+        caminho_atual.append(origem)
 
-    # Inicia a busca a partir da cidade de origem
-    dfs(origem, [])
+        # Se a cidade de origem for o destino, adiciona o caminho ao dicionário de resultados
+        if origem == destino:
+            caminhos_encontrados[caminho_id] = {
+                "caminho": caminho_atual.copy(),  # Clona o caminho atual
+                "custo_total": custo_atual
+            }
+            caminho_id += 1
+            caminho_atual.pop()  # Remove a cidade atual do caminho antes de retornar
+            return
 
-    return rotas  # Retorna o dicionário de rotas
+        # Marca a cidade como visitada
+        visitado.add(origem)
 
-def definir_rotas() -> dict:
-    trechos_viagem = {
-        "São Paulo - SP": {
-            "Rio de Janeiro - RJ": {"distancia": 430, "vagas": 5},
-            "Belo Horizonte - MG": {"distancia": 586, "vagas": 8}
-        },
-        "Rio de Janeiro - RJ": {
-            "São Paulo - SP": {"distancia": 430, "vagas": 5},
-            "Brasília - DF": {"distancia": 1148, "vagas": 3}
-        },
-        "Brasília - DF": {
-            "Rio de Janeiro - RJ": {"distancia": 1148, "vagas": 3},
-            "Salvador - BA": {"distancia": 1440, "vagas": 6}
-        },
-        "Salvador - BA": {
-            "Brasília - DF": {"distancia": 1440, "vagas": 6},
-            "Fortaleza - CE": {"distancia": 1023, "vagas": 4}
-        },
-        "Fortaleza - CE": {
-            "Salvador - BA": {"distancia": 1023, "vagas": 4},
-            "Recife - PE": {"distancia": 800, "vagas": 10}
-        },
-        "Belo Horizonte - MG": {
-            "São Paulo - SP": {"distancia": 586, "vagas": 8},
-            "Porto Alegre - RS": {"distancia": 1712, "vagas": 7}
-        },
-        "Recife - PE": {
-            "Fortaleza - CE": {"distancia": 800, "vagas": 10},
-            "Manaus - AM": {"distancia": 2714, "vagas": 2}
-        },
-        "Porto Alegre - RS": {
-            "Belo Horizonte - MG": {"distancia": 1712, "vagas": 7},
-            "Curitiba - PR": {"distancia": 711, "vagas": 9}
-        },
-        "Curitiba - PR": {
-            "Porto Alegre - RS": {"distancia": 711, "vagas": 9},
-            "São Paulo - SP": {"distancia": 408, "vagas": 5}
-        },
-        "Manaus - AM": {
-            "Recife - PE": {"distancia": 2714, "vagas": 2},
-            "Brasília - DF": {"distancia": 1930, "vagas": 6}
-        }
-    }    
-    return trechos_viagem
+        # Verifica todos os trechos disponíveis a partir da cidade de origem
+        if origem in trechos:
+            for cidade_destino, info_trecho in trechos[origem].items():
+                # Verifica se o trecho tem vagas disponíveis e se a cidade não foi visitada ainda
+                if info_trecho["vagas"] > 0 and cidade_destino not in visitado:
+                    # Atualiza o custo e faz a busca recursiva
+                    dfs(
+                        cidade_destino, 
+                        destino, 
+                        visitado, 
+                        caminho_atual, 
+                        custo_atual + info_trecho["preco"]
+                    )
 
+        # Remove a cidade atual do caminho e a desmarca como visitada (backtracking)
+        caminho_atual.pop()
+        visitado.remove(origem)
+
+    # Inicia a busca em profundidade
+    dfs(origem, destino)
+    return caminhos_encontrados
 
 
 def start_server(host='localhost', port=1080):
@@ -116,24 +142,23 @@ def start_server(host='localhost', port=1080):
     cont_compra = 0
     while True:        
         # Exemplo de como acessar os atributos das instâncias criadas
-        client_socket.send(pickle.dumps(cidades_objetos))
+
         # aceita a conexão
         client_socket, client_address = socket_server.accept()
         print(f"conectado com {client_address}")
-
+        dinheiro = 10
+        obj = busca_todos_caminhos(retornar_trechos(), "Salvador, BA", "Fortaleza, CE")
+        print(obj)
+        data = pickle.dumps(obj)
         # recebe dados do cliente
-        data = client_socket.recv(4096)
-        objeto_recebido = pickle.loads(data)
+        client_socket.sendall(data)
 
         # envia um retorno para o cliente
         response = "objeto recebido com sucesso"
         client_socket.send(response.encode())
-        for obj in objeto_recebido:
-            print(f"nome: {obj.nome}\nid: {obj.id}\nestado: {obj.estado}")
-
-        
         # fecha a conexão
         client_socket.close()
 
 if __name__ == "__main__":
     start_server()
+    #teste()

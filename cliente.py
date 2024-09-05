@@ -7,13 +7,17 @@ from datetime import datetime
 def start_client(host='localhost', port=1080):
     # cria um socket TCP
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    response = client_socket.recv(1024).decode()
-    print(f"Server response: {response}")
-    # envia uma mensagem para o servidor
-    print("enviando obejto de compra para o servidor...")    # recebe a resposta do servidor
-
-    
+    client_socket.connect((host, port))
+    #response = client_socket.recv(1024).decode()   # recebe a resposta do servidor
+    data = client_socket.recv(4096)
+    print("Teste")
+    objeto_recebido = pickle.loads(data)
+    # envia um retorno para o cliente
+    response = "objeto recebido com sucesso"
+    client_socket.send(response.encode())
+    print("Teste")
+    #for obj in objeto_recebido:
+    print(f"nome: {objeto_recebido}")
     # fecha a conexão
     client_socket.close()
 
