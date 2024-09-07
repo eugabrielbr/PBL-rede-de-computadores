@@ -1,32 +1,16 @@
 import socket
-import compra
 import pickle
 import os
-from datetime import datetime
 
-def start_client(host='172.16.103.226', port=1080):
-    # cria um socket TCP
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-    # conecta ao servidor
-    client_socket.connect((host, port))
-
-    teste = compra.Compra("Gabriel",1,[("sao_paulo","bahia")],datetime.now()) #objeto teste
-    obj = pickle.dumps(teste)
-    
-    # envia uma mensagem para o servidor
-    print("enviando obejto de compra para o servidor...")
-    client_socket.sendall(obj)
-    
-    # recebe a resposta do servidor
-    response = client_socket.recv(1024).decode()
-    print(f"Server response: {response}")
-
-    
-    # fecha a conexão
-    client_socket.close()
-
-
+def start_client(host='localhost', port=1080):
+    """Cria e conecta o socket do cliente."""
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((host, port))
+        return client_socket
+    except socket.error as e:
+        print(f"Erro ao conectar ao servidor: {e}")
+        raise
 
 def limpar_tela():
     """Limpa a tela do terminal para uma visualização mais limpa."""
@@ -52,6 +36,35 @@ def ver_trechos():
     print("Aqui você pode visualizar os trechos disponíveis.")
     input("\nPressione Enter para voltar ao menu principal...")
 
+def selecionar_origem(opcao):
+    """Seleciona a cidade de origem com base na opção escolhida."""
+    switch_origem = {
+        1: "São Paulo, SP",
+        2: "Rio de Janeiro, RJ",
+        3: "Brasília, DF",
+        4: "Salvador, BA",
+        5: "Fortaleza, CE",
+        6: "Belo Horizonte, MG",
+        7: "Recife, PE",
+        8: "Porto Alegre, RS",
+        9: "Curitiba, PR",
+        10: "Manaus, AM"
+    }
+    return switch_origem.get(opcao, "Opção inválida")
+
+def print_cidades():
+    """Imprime as cidades disponíveis para escolha."""
+    print("1. São Paulo, SP")
+    print("2. Rio de Janeiro, RJ")
+    print("3. Brasília, DF")
+    print("4. Salvador, BA")
+    print("5. Fortaleza, CE")
+    print("6. Belo Horizonte, MG")
+    print("7. Recife, PE")
+    print("8. Porto Alegre, RS")
+    print("9. Curitiba, PR")
+    print("10. Manaus, AM")
+
 def compra_menu():
     """Simula o processo de compra."""
     limpar_tela()
@@ -59,9 +72,36 @@ def compra_menu():
     print("       COMPRA")
     print("="*30)
     print("Aqui você pode realizar a compra.")
-    input("\nPressione Enter para voltar ao menu principal...")
+    print("Escolha a origem\n")
+    print_cidades()
+    
+    try:
+        opcao = int(input("Escolha uma opção: "))
+        cidade1 = selecionar_origem(opcao)
+        if cidade1 == "Opção inválida":
+            raise ValueError("Opção de origem inválida.")
+        
+        limpar_tela()
 
-def menu():
+        print("="*30)
+        print("       COMPRA")
+        print("="*30)
+        print("Aqui você pode realizar a compra.")
+        print("Escolha o destino\n")
+        print_cidades()
+        
+        opcao1 = int(input("Escolha uma opção: "))
+        cidade2 = selecionar_origem(opcao1)
+        if cidade2 == "Opção inválida":
+            raise ValueError("Opção de destino inválida.")
+
+        return cidade1, cidade2
+
+    except ValueError as ve:
+        print(f"Erro na escolha: {ve}")
+        return None, None
+
+def menu(client_socket):
     """Função principal que exibe o menu e processa a escolha do usuário."""
     while True:
         exibir_menu()
@@ -71,7 +111,28 @@ def menu():
         if escolha == '1':
             ver_trechos()
         elif escolha == '2':
-            compra_menu()
+            cidades = compra_menu()
+            if cidades == (None, None):
+                input("Pressione Enter para voltar ao menu principal...")
+                continue
+
+            try:
+                obj = pickle.dumps(cidades)
+                client_socket.sendall(obj)
+                
+                # Recebe a resposta do servidor
+                data = client_socket.recv(4096)
+                if not data:
+                    print("Nenhum dado recebido do servidor.")
+                    continue
+
+                objeto_recebido = pickle.loads(data)
+                print(f"Objeto recebido do servidor: {objeto_recebido}")
+            
+            except (pickle.PickleError, socket.error) as e:
+                print(f"Erro na comunicação: {e}")
+            
+            input("Pressione Enter para voltar ao menu principal...")
         elif escolha == '3':
             limpar_tela()
             print("="*30)
@@ -83,16 +144,16 @@ def menu():
             print("="*30)
             print("   Opção inválida! Tente novamente.")
             print("="*30)
-            input("\nPressione Enter para continuar...")
+            input("Pressione Enter para continuar...")
 
-    return escolha
+    client_socket.close()
 
 def main():
-    start_client()
-    
-    menu()
-    
-   
+    try:
+        client_socket = start_client()
+        menu(client_socket)
+    except Exception as e:
+        print(f"Erro inesperado: {e}")
 
 if __name__ == "__main__":
     main()
