@@ -122,6 +122,7 @@ def menu(client_socket):
                 
                 # Recebe a resposta do servidor
                 data = client_socket.recv(4096)
+                
                 if not data:
                     print("Nenhum dado recebido do servidor.")
                     continue
