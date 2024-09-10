@@ -5,7 +5,7 @@ def retornar_trechos():
     """Retorna o dicionário de trechos de viagem."""
     trechos_viagem = {
         "São Paulo, SP": {
-            "Rio de Janeiro, RJ": {"distancia": 430, "vagas": 5, "preco": 120},
+            "Rio de Janeiro, RJ": {"distancia": 430, "vagas": 1, "preco": 120},
             "Belo Horizonte, MG": {"distancia": 586, "vagas": 8, "preco": 150}
         },
         "Rio de Janeiro, RJ": {
@@ -13,7 +13,7 @@ def retornar_trechos():
             "Brasília, DF": {"distancia": 1148, "vagas": 3, "preco": 250}
         },
         "Brasília, DF": {
-            "Rio de Janeiro, RJ": {"distancia": 1148, "vagas": 2, "preco": 250},
+            "Rio de Janeiro, RJ": {"distancia": 1148, "vagas": 1, "preco": 250},
             "Salvador, BA": {"distancia": 1440, "vagas": 6, "preco": 300}
         },
         "Salvador, BA": {
@@ -48,28 +48,30 @@ def retornar_trechos():
     return trechos_viagem
 
 def busca_possibilidades(grafo, origem, destino):
-    """Busca todas as possibilidades de rotas de origem a destino."""
+    """Busca todas as possibilidades de rotas de origem a destino, incluindo o preço total."""
     rotas = {}
     id_rota = 1
 
-    def dfs(cidade_atual, caminho, visitados):
+    def dfs(cidade_atual, caminho, visitados, preco_total):
         nonlocal id_rota
         caminho.append(cidade_atual)
         visitados.add(cidade_atual)
 
         if cidade_atual == destino:
-            rotas[id_rota] = caminho[:]
+            rotas[id_rota] = {"caminho": caminho[:], "preco_total": preco_total}
             id_rota += 1
         else:
             for vizinho, info in grafo.get(cidade_atual, {}).items():
                 if info["vagas"] > 0 and vizinho not in visitados:
-                    dfs(vizinho, caminho[:], visitados)
+                    # Somar o preço da viagem atual ao preço total
+                    dfs(vizinho, caminho[:], visitados, preco_total + info["preco"])
 
         caminho.pop()
         visitados.remove(cidade_atual)
 
-    dfs(origem, [], set())
+    dfs(origem, [], set(), 0)
     return rotas
+
 
 def start_server(host='localhost', port=1080):
     """Inicia o servidor para aceitar conexões de clientes e processar dados."""
@@ -91,9 +93,11 @@ def start_server(host='localhost', port=1080):
                     
                     obj = pickle.loads(data)
                     print(f"Dados recebidos: {obj}")
-
-                    cidade1, cidade2 = obj
-                    new_obj = busca_possibilidades(retornar_trechos(), cidade1, cidade2)
+                    if(obj == "trechos"):
+                        new_obj = retornar_trechos()
+                    else:
+                        cidade1, cidade2 = obj
+                        new_obj = busca_possibilidades(retornar_trechos(), cidade1, cidade2)
                     data_send = pickle.dumps(new_obj)
                     client_socket.sendall(data_send)
 

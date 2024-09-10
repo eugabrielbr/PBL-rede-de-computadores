@@ -34,7 +34,6 @@ def ver_trechos():
     print("       VER TRECHOS")
     print("="*30)
     print("Aqui você pode visualizar os trechos disponíveis.")
-    input("\nPressione Enter para voltar ao menu principal...")
 
 def selecionar_origem(opcao):
     """Seleciona a cidade de origem com base na opção escolhida."""
@@ -90,7 +89,7 @@ def compra_menu():
         print("Escolha o destino\n")
         print_cidades()
         
-        opcao1 = int(input("Escolha uma opção: "))
+        opcao1 = int(input("Escolha uma opção: "))  
         cidade2 = selecionar_origem(opcao1)
         if cidade2 == "Opção inválida":
             raise ValueError("Opção de destino inválida.")
@@ -110,6 +109,35 @@ def menu(client_socket):
         
         if escolha == '1':
             ver_trechos()
+            try:
+                obj = pickle.dumps("trechos")
+                client_socket.sendall(obj)
+                
+                # Recebe a resposta do servidor
+                data = client_socket.recv(4096)
+                
+                if not data:
+                    print("Nenhum dado recebido do servidor.")
+                    continue
+
+                objeto_recebido = pickle.loads(data)
+                #print(f"Objeto recebido do servidor: {objeto_recebido}")
+                i = 1
+                for obj in objeto_recebido.keys():
+                    print(f"Origem {i}: {format(obj)}")
+                    i+= 1
+                    j = 1
+                    print()
+                    for obj_ex in objeto_recebido[obj]:
+                        print(f"[Trecho {j}: {obj_ex}] | [Distância: {objeto_recebido[obj][obj_ex]["distancia"]}km] | [Vagas: {objeto_recebido[obj][obj_ex]["vagas"]}] | [Valor: R${objeto_recebido[obj][obj_ex]["distancia"]}]")
+                        j += 1
+                    print()
+
+            except (pickle.PickleError, socket.error) as e:
+                print(f"Erro na comunicação: {e}")
+            
+            input("Pressione Enter para voltar ao menu principal...")
+
         elif escolha == '2':
             cidades = compra_menu()
             if cidades == (None, None):
@@ -129,7 +157,11 @@ def menu(client_socket):
 
                 objeto_recebido = pickle.loads(data)
                 print(f"Objeto recebido do servidor: {objeto_recebido}")
-            
+                if(not objeto_recebido):
+                    print("Não há trechos disponiveis para realizar essa viagem.")
+                print()
+                escolha_trecho = int(input("Escolha o trecho desejado: "))
+                
             except (pickle.PickleError, socket.error) as e:
                 print(f"Erro na comunicação: {e}")
             
