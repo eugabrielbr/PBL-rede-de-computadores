@@ -89,7 +89,7 @@ def compra_menu():
         print("Escolha o destino\n")
         print_cidades()
         
-        opcao1 = int(input("Escolha uma opção: "))  
+        opcao1 = int(input("Escolha uma opção: "))
         cidade2 = selecionar_origem(opcao1)
         if cidade2 == "Opção inválida":
             raise ValueError("Opção de destino inválida.")
@@ -129,7 +129,7 @@ def menu(client_socket):
                     j = 1
                     print()
                     for obj_ex in objeto_recebido[obj]:
-                        print(f"[Trecho {j}: {obj_ex}] | [Distância: {objeto_recebido[obj][obj_ex]["distancia"]}km] | [Vagas: {objeto_recebido[obj][obj_ex]["vagas"]}] | [Valor: R${objeto_recebido[obj][obj_ex]["distancia"]}]")
+                        print(f"[Trecho {j}: {obj_ex}] | [Distância: {objeto_recebido[obj][obj_ex]["distancia"]}km] | [Vagas: {objeto_recebido[obj][obj_ex]["vagas"]}] | [Valor: R${objeto_recebido[obj][obj_ex]["preco"]}]")
                         j += 1
                     print()
 
@@ -159,9 +159,22 @@ def menu(client_socket):
                 print(f"Objeto recebido do servidor: {objeto_recebido}")
                 if(not objeto_recebido):
                     print("Não há trechos disponiveis para realizar essa viagem.")
-                print()
-                escolha_trecho = int(input("Escolha o trecho desejado: "))
-                
+                else:
+                    condicao = True
+                    while(condicao):
+                        print()
+                        escolha_trecho = (input("Escolha o trecho desejado: "))
+                        if(escolha_trecho.isnumeric() and ((int(escolha_trecho) <= 10 and int(escolha_trecho) >= 1))):
+                            condicao = False
+                    obj1 = pickle.dumps(("compra",objeto_recebido[int(escolha_trecho)]))
+                    client_socket.sendall(obj1)
+                    data = client_socket.recv(4096)
+                    if not data:
+                        print("Nenhum dado recebido do servidor.")
+                        continue
+                    objeto_recebido = pickle.loads(data)
+
+
             except (pickle.PickleError, socket.error) as e:
                 print(f"Erro na comunicação: {e}")
             
