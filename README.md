@@ -1,2 +1,12 @@
-Atualmente conseguimos enviar um objeto do cliente para o servidor que tenha dados de compra teste, tudo isso feito com o servidor rodando em
-um computador e o cliente no outro, nossa próxima etapa é definir as estruturas de dados que usaremos no nosso programa.
+## Introdução
+**(contexto)**, **(problema)**, **(contribuição)**, **(metodologia)**, **(resultados)**.
+
+## Fundamentação teórica
+
+## Metodologia
+
+## Resultados
+
+## Conclusão
+
+## Referências
