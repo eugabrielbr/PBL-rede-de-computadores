@@ -96,20 +96,10 @@ def editar_trecho(caminho, trechosviagem):
         if(trechosviagem[trecho[0]][trecho[1]]["vagas"] > 0):
             trechosviagem[trecho[0]][trecho[1]]["vagas"] -= 1
             print(trechosviagem[trecho[0]][trecho[1]]["vagas"])
+            trecho.pop(0)
         elif(trechosviagem[trecho[0]][trecho[1]]["vagas"] < 1):
             return False
     return trechosviagem
-
-
-def verificar_trecho(caminho, trechosviagem):
-    trechos = trechosviagem
-    trecho = caminho["caminho"]
-    while(len(trecho) > 1):
-        if(trechos[trecho[0]][trecho[1]]["vagas"] > 0):
-            trecho.pop(0)
-        elif(trechos[trecho[0]][trecho[1]]["vagas"] < 1):
-            return False
-    return True
 
 
 
@@ -163,7 +153,6 @@ def start_server(host='localhost', port=1080):
                     if(obj == "trechos"):
                         new_obj = trechosviagem
                     elif(obj[0] == "compra"):
-                        new_obj = verificar_trecho(obj[1], trechosviagem) # primeiro verifica se o trecho realmente tem vagas
                         trechosviagem = editar_trecho(obj[1], trechosviagem)
                     else:
                         cidade1, cidade2 = obj
