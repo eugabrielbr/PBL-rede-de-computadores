@@ -2,6 +2,11 @@ import socket
 import pickle
 import os
 
+
+class Cliente:
+    def __init__(self, cpf):
+        self.cpf = cpf
+
 def start_client(host='localhost', port=1080):
     """Cria e conecta o socket do cliente."""
     try:
@@ -73,23 +78,24 @@ def compra_menu():
     print("Aqui você pode realizar a compra.")
     print("Escolha a origem\n")
     print_cidades()
-    
+
     try:
         opcao = int(input("Escolha uma opção: "))
         cidade1 = selecionar_origem(opcao)
         if cidade1 == "Opção inválida":
             raise ValueError("Opção de origem inválida.")
-        
+
         limpar_tela()
 
         print("="*30)
         print("       COMPRA")
         print("="*30)
+
         print("Aqui você pode realizar a compra.")
         print("Escolha o destino\n")
         print_cidades()
-        
-        opcao1 = int(input("Escolha uma opção: "))  
+
+        opcao1 = int(input("Escolha uma opção: "))
         cidade2 = selecionar_origem(opcao1)
         if cidade2 == "Opção inválida":
             raise ValueError("Opção de destino inválida.")
@@ -102,84 +108,120 @@ def compra_menu():
 
 def menu(client_socket):
     """Função principal que exibe o menu e processa a escolha do usuário."""
-    while True:
-        exibir_menu()
-        
-        escolha = input("Escolha uma opção (1/2/3): ")
-        
-        if escolha == '1':
-            ver_trechos()
-            try:
-                obj = pickle.dumps("trechos")
-                client_socket.sendall(obj)
-                
-                # Recebe a resposta do servidor
-                data = client_socket.recv(4096)
-                
-                if not data:
-                    print("Nenhum dado recebido do servidor.")
-                    continue
+    cliente_logado = login()
 
-                objeto_recebido = pickle.loads(data)
-                #print(f"Objeto recebido do servidor: {objeto_recebido}")
-                i = 1
-                for obj in objeto_recebido.keys():
-                    print(f"Origem {i}: {format(obj)}")
-                    i+= 1
-                    j = 1
-                    print()
-                    for obj_ex in objeto_recebido[obj]:
-                        print(f"[Trecho {j}: {obj_ex}] | [Distância: {objeto_recebido[obj][obj_ex]["distancia"]}km] | [Vagas: {objeto_recebido[obj][obj_ex]["vagas"]}] | [Valor: R${objeto_recebido[obj][obj_ex]["distancia"]}]")
-                        j += 1
-                    print()
+    # Verificando cliente logado
+    try:
+        obj_cliente = pickle.dumps(cliente_logado)
+        client_socket.sendall(obj_cliente)
+    except:
+        pass
 
-            except (pickle.PickleError, socket.error) as e:
-                print(f"Erro na comunicação: {e}")
+    data_ver = client_socket.recv(4096)
+    data_ver = pickle.loads(data_ver)
+   
+
+    if data_ver == True:
+        
+        while True:
             
-            input("Pressione Enter para voltar ao menu principal...")
+            exibir_menu()
+            
+            escolha = input("Escolha uma opção (1/2/3): ")
+            
+            if escolha == '1':
+                ver_trechos()
+                try:
+                    obj = pickle.dumps("trechos")
+                    client_socket.sendall(obj)
+                    
+                    # Recebe a resposta do servidor
+                    data = client_socket.recv(4096)
+                    
+                    if not data:
+                        print("Nenhum dado recebido do servidor.")
+                        continue
 
-        elif escolha == '2':
-            cidades = compra_menu()
-            if cidades == (None, None):
+                    objeto_recebido = pickle.loads(data)
+                    # print(f"Objeto recebido do servidor: {objeto_recebido}")
+                    i = 1
+                    for obj in objeto_recebido.keys():
+                        print(f"Origem {i}: {format(obj)}")
+                        i += 1
+                        j = 1
+                        print()
+                        for obj_ex in objeto_recebido[obj]:
+                            print(f"[Trecho {j}: {obj_ex}] | [Distância: {objeto_recebido[obj][obj_ex]['distancia']}km] | [Vagas: {objeto_recebido[obj][obj_ex]['vagas']}] | [Valor: R${objeto_recebido[obj][obj_ex]['preco']}]")
+                            j += 1
+                        print()
+
+                except (pickle.PickleError, socket.error) as e:
+                    print(f"Erro na comunicação: {e}")
+                
                 input("Pressione Enter para voltar ao menu principal...")
-                continue
 
-            try:
-                obj = pickle.dumps(cidades)
-                client_socket.sendall(obj)
-                
-                # Recebe a resposta do servidor
-                data = client_socket.recv(4096)
-                
-                if not data:
-                    print("Nenhum dado recebido do servidor.")
+            elif escolha == '2':
+                cidades = compra_menu()
+                if cidades == (None, None):
+                    input("Pressione Enter para voltar ao menu principal...")
                     continue
 
-                objeto_recebido = pickle.loads(data)
-                print(f"Objeto recebido do servidor: {objeto_recebido}")
-                if(not objeto_recebido):
-                    print("Não há trechos disponiveis para realizar essa viagem.")
-                print()
-                escolha_trecho = int(input("Escolha o trecho desejado: "))
+                try:
+                    obj = pickle.dumps(cidades)
+                    client_socket.sendall(obj)
+                    
+                    # Recebe a resposta do servidor
+                    data = client_socket.recv(4096)
+                    
+                    if not data:
+                        print("Nenhum dado recebido do servidor.")
+                        continue
+
+                    objeto_recebido = pickle.loads(data)
+                    print(f"Objeto recebido do servidor: {objeto_recebido}")
+                    if not objeto_recebido:
+                        print("Não há trechos disponíveis para realizar essa viagem.")
+                    else:
+                        condicao = True
+                        while condicao:
+                            print()
+                            escolha_trecho = input("Escolha o trecho desejado: ")
+                            if escolha_trecho.isnumeric() and 1 <= int(escolha_trecho) <= 10:
+                                condicao = False
+                        obj1 = pickle.dumps(("compra", objeto_recebido[int(escolha_trecho)]))
+                        client_socket.sendall(obj1)
+                        data = client_socket.recv(4096)
+
+                        if not data:
+                            print("Nenhum dado recebido do servidor.")
+                            continue
+                        objeto_recebido = pickle.loads(data)
+
+                except (pickle.PickleError, socket.error) as e:
+                    print(f"Erro na comunicação: {e}")
                 
-            except (pickle.PickleError, socket.error) as e:
-                print(f"Erro na comunicação: {e}")
-            
-            input("Pressione Enter para voltar ao menu principal...")
-        elif escolha == '3':
-            limpar_tela()
-            print("="*30)
-            print("   Saindo do programa...")
-            print("="*30)
-            break
-        else:
-            limpar_tela()
-            print("="*30)
-            print("   Opção inválida! Tente novamente.")
-            print("="*30)
-            input("Pressione Enter para continuar...")
+                input("Pressione Enter para voltar ao menu principal...")
+            elif escolha == '3':
+                limpar_tela()
+                print("="*30)
+                print("   Saindo do programa...")
+                print("="*30)
+                break
+            else:
+                limpar_tela()
+                print("="*30)
+                print("   Opção inválida! Tente novamente.")
+                print("="*30)
+                input("Pressione Enter para continuar...")
+    else:
+        print("Cliente já está logado, tente novamente mais tarde")
 
     client_socket.close()
+
+def login():
+    cpf = input("Insira CPF: ")
+    cliente = Cliente(cpf)
+    return cliente
 
 def main():
     try:
