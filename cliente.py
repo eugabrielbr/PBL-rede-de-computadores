@@ -94,8 +94,8 @@ def compra_menu():
         print("Aqui você pode realizar a compra.")
         print("Escolha o destino\n")
         print_cidades()
-
-        opcao1 = int(input("Escolha uma opção: "))
+        
+        opcao1 = int(input("Escolha uma opção: "))  
         cidade2 = selecionar_origem(opcao1)
         if cidade2 == "Opção inválida":
             raise ValueError("Opção de destino inválida.")
@@ -142,18 +142,18 @@ def menu(client_socket):
                         print("Nenhum dado recebido do servidor.")
                         continue
 
-                    objeto_recebido = pickle.loads(data)
-                    # print(f"Objeto recebido do servidor: {objeto_recebido}")
-                    i = 1
-                    for obj in objeto_recebido.keys():
-                        print(f"Origem {i}: {format(obj)}")
-                        i += 1
-                        j = 1
-                        print()
-                        for obj_ex in objeto_recebido[obj]:
-                            print(f"[Trecho {j}: {obj_ex}] | [Distância: {objeto_recebido[obj][obj_ex]['distancia']}km] | [Vagas: {objeto_recebido[obj][obj_ex]['vagas']}] | [Valor: R${objeto_recebido[obj][obj_ex]['preco']}]")
-                            j += 1
-                        print()
+                objeto_recebido = pickle.loads(data)
+                #print(f"Objeto recebido do servidor: {objeto_recebido}")
+                i = 1
+                for obj in objeto_recebido.keys():
+                    print(f"Origem {i}: {format(obj)}")
+                    i+= 1
+                    j = 1
+                    print()
+                    for obj_ex in objeto_recebido[obj]:
+                        print(f"[Trecho {j}: {obj_ex}] | [Distância: {objeto_recebido[obj][obj_ex]["distancia"]}km] | [Vagas: {objeto_recebido[obj][obj_ex]["vagas"]}] | [Valor: R${objeto_recebido[obj][obj_ex]["distancia"]}]")
+                        j += 1
+                    print()
 
                 except (pickle.PickleError, socket.error) as e:
                     print(f"Erro na comunicação: {e}")
@@ -177,44 +177,29 @@ def menu(client_socket):
                         print("Nenhum dado recebido do servidor.")
                         continue
 
-                    objeto_recebido = pickle.loads(data)
-                    print(f"Objeto recebido do servidor: {objeto_recebido}")
-                    if not objeto_recebido:
-                        print("Não há trechos disponíveis para realizar essa viagem.")
-                    else:
-                        condicao = True
-                        while condicao:
-                            print()
-                            escolha_trecho = input("Escolha o trecho desejado: ")
-                            if escolha_trecho.isnumeric() and 1 <= int(escolha_trecho) <= 10:
-                                condicao = False
-                        obj1 = pickle.dumps(("compra", objeto_recebido[int(escolha_trecho)]))
-                        client_socket.sendall(obj1)
-                        data = client_socket.recv(4096)
-
-                        if not data:
-                            print("Nenhum dado recebido do servidor.")
-                            continue
-                        objeto_recebido = pickle.loads(data)
-
-                except (pickle.PickleError, socket.error) as e:
-                    print(f"Erro na comunicação: {e}")
+                objeto_recebido = pickle.loads(data)
+                print(f"Objeto recebido do servidor: {objeto_recebido}")
+                if(not objeto_recebido):
+                    print("Não há trechos disponiveis para realizar essa viagem.")
+                print()
+                escolha_trecho = int(input("Escolha o trecho desejado: "))
                 
-                input("Pressione Enter para voltar ao menu principal...")
-            elif escolha == '3':
-                limpar_tela()
-                print("="*30)
-                print("   Saindo do programa...")
-                print("="*30)
-                break
-            else:
-                limpar_tela()
-                print("="*30)
-                print("   Opção inválida! Tente novamente.")
-                print("="*30)
-                input("Pressione Enter para continuar...")
-    else:
-        print("Cliente já está logado, tente novamente mais tarde")
+            except (pickle.PickleError, socket.error) as e:
+                print(f"Erro na comunicação: {e}")
+            
+            input("Pressione Enter para voltar ao menu principal...")
+        elif escolha == '3':
+            limpar_tela()
+            print("="*30)
+            print("   Saindo do programa...")
+            print("="*30)
+            break
+        else:
+            limpar_tela()
+            print("="*30)
+            print("   Opção inválida! Tente novamente.")
+            print("="*30)
+            input("Pressione Enter para continuar...")
 
     client_socket.close()
 
