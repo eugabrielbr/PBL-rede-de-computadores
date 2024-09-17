@@ -4,8 +4,9 @@ import os
 
 
 class Cliente:
-    def __init__(self, cpf):
+    def __init__(self, cpf, trechos):
         self.cpf = cpf
+        self.trechos = trechos
 
 def start_client(host='localhost', port=1080):
     """Cria e conecta o socket do cliente."""
@@ -108,17 +109,7 @@ def compra_menu():
 
 def menu(client_socket):
     """Função principal que exibe o menu e processa a escolha do usuário."""
-    cliente_logado = login()
-
-    # Verificando cliente logado
-    try:
-        obj_cliente = pickle.dumps(cliente_logado)
-        client_socket.sendall(obj_cliente)
-    except:
-        pass
-
-    data_ver = client_socket.recv(4096)
-    data_ver = pickle.loads(data_ver)
+    data_ver = login(client_socket)
    
 
     if data_ver == True:
@@ -167,7 +158,7 @@ def menu(client_socket):
                     continue
 
                 try:
-                    obj = pickle.dumps(cidades)
+                    obj = pickle.dumps(("viagem",cidades))
                     client_socket.sendall(obj)
                     
                     # Recebe a resposta do servidor
@@ -183,15 +174,19 @@ def menu(client_socket):
                         print("Não há trechos disponíveis para realizar essa viagem.")
                     else:
                         condicao = True
+                        condicao2 = False
                         while condicao:
                             print()
-                            escolha_trecho = input("Escolha o trecho desejado: ")
+                            escolha_trecho = input("Escolha o trecho desejado(para desistir digite 'cancelar'): ")
+                            if escolha_trecho == "cancelar":
+                                break
                             if escolha_trecho.isnumeric() and 1 <= int(escolha_trecho) <= 10:
                                 condicao = False
-                        obj1 = pickle.dumps(("compra", objeto_recebido[int(escolha_trecho)]))
-                        client_socket.sendall(obj1)
-                        data = client_socket.recv(4096)
-
+                                condicao2 = True
+                        if condicao2:
+                            obj1 = pickle.dumps(("compra", objeto_recebido[int(escolha_trecho)]))
+                            client_socket.sendall(obj1)
+                            data = client_socket.recv(4096)
                         if not data:
                             print("Nenhum dado recebido do servidor.")
                             continue
@@ -218,10 +213,30 @@ def menu(client_socket):
 
     client_socket.close()
 
-def login():
-    cpf = input("Insira CPF: ")
-    cliente = Cliente(cpf)
-    return cliente
+def login(client_socket):
+    valido = True
+    while(valido):
+        cpf = input("Insira CPF: ")
+        obj = pickle.dumps(("consulta", cpf))
+        client_socket.sendall(obj)
+        data = client_socket.recv(4096)
+        cliente_recebido = pickle.loads(data)
+        print(f"{cliente_recebido} -> dado recebido do servidor.")  
+        # Verificando cliente logado
+        try:
+            obj_cliente = pickle.dumps(cliente_recebido)
+            client_socket.sendall(obj_cliente)
+        except:
+            pass
+
+        data_ver = client_socket.recv(4096)
+        data_ver = pickle.loads(data_ver)
+        if(data_ver==True):
+            valido = False
+        else:
+            print("CPF já está logado no servidor")
+
+    return data_ver
 
 def main():
     try:
