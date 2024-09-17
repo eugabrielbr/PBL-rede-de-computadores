@@ -44,16 +44,16 @@ def ver_trechos():
 def selecionar_origem(opcao):
     """Seleciona a cidade de origem com base na opção escolhida."""
     switch_origem = {
-        1: "São Paulo, SP",
-        2: "Rio de Janeiro, RJ",
-        3: "Brasília, DF",
-        4: "Salvador, BA",
-        5: "Fortaleza, CE",
-        6: "Belo Horizonte, MG",
-        7: "Recife, PE",
-        8: "Porto Alegre, RS",
-        9: "Curitiba, PR",
-        10: "Manaus, AM"
+        1: "São Paulo-SP",
+        2: "Rio de Janeiro-RJ",
+        3: "Brasília-DF",
+        4: "Salvador-BA",
+        5: "Fortaleza-CE",
+        6: "Belo Horizonte-MG",
+        7: "Recife-PE",
+        8: "Porto Alegre-RS",
+        9: "Curitiba-PR",
+        10: "Manaus-AM"
     }
     return switch_origem.get(opcao, "Opção inválida")
 
@@ -103,8 +103,8 @@ def compra_menu():
 
         return cidade1, cidade2
 
-    except ValueError as ve:
-        print(f"Erro na escolha: {ve}")
+    except ValueError:
+        print("Opção inválida, utilize os números de 1-10")
         return None, None
 
 def menu(client_socket):
@@ -169,7 +169,10 @@ def menu(client_socket):
                         continue
 
                     objeto_recebido = pickle.loads(data)
-                    print(f"Objeto recebido do servidor: {objeto_recebido}")
+                    for caminho in objeto_recebido:
+                            stringteste = " -> ".join(objeto_recebido[caminho]['caminho'])
+                            print(f"Trajeto {caminho}:\n{stringteste}\nValor: R${objeto_recebido[caminho]['preco_total']}")
+                            print()
                     if not objeto_recebido:
                         print("Não há trechos disponíveis para realizar essa viagem.")
                     else:

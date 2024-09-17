@@ -123,7 +123,7 @@ def start_server(host='localhost', port=1080):
                     cliente_conectado = obj_login
                     clientes_conectados.append(cliente_conectado)
                     block = True
-                    salvar_clientes(clientes)
+                    #salvar_clientes(clientes)
 
             except (pickle.PickleError, socket.error) as e:
                 print(f"Erro na comunicação conc: {e}")
@@ -160,14 +160,17 @@ def start_server(host='localhost', port=1080):
                     clientes = dados["clientes"]
                     trechos_viagem = dados["trechos"]
 
-                print(clientes_conectados)
-                if cliente_conectado.cpf in clientes_conectados:
-                    client_socket.close()
-                    clientes_conectados.remove(cliente_conectado.cpf)
-                print(clientes_conectados)
+                print(f"antes{clientes_conectados}")
+                #if cliente_conectado in clientes_conectados:
+                for cliente_iterator in clientes_conectados:
+                    if (cliente_conectado.cpf == cliente_iterator.cpf):
+                        client_socket.close()
+                        cliente_copia = cliente_iterator
+                        break
+                clientes_conectados.remove(cliente_copia)
+                print(f"depois{clientes_conectados}")
 
 
-                    
     except (socket.error, Exception) as e:
         print(f"Erro ao iniciar o servidor: {e}")
 
