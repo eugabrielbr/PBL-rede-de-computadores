@@ -26,7 +26,7 @@
   <h3>Arquitetura da solução</h3>
 
   <p>
-    Primeiro, antes de explicar diretamente qual é a arquitetura da solução, é preciso destacar qual foi o planejamento inicial de comunicação entre um cliente que deseja comprar a passagem e o servidor que recebe a solicitação de compra. Segue na Figura 1 um diagrama que descreve a ideia do fluxo que serviu como base para o início do desenvolvimento. 
+    Primeiro, antes de explicar diretamente qual é a arquitetura da solução, é preciso destacar qual foi o planejamento inicial de comunicação entre um cliente que deseja comprar a passagem e o servidor que recebe a solicitação de compra. Segue na Figura 1 o diagrama que descreve a ideia do fluxo que serviu como base para o início do desenvolvimento. 
   </p>
 
   <div align="center"> 
