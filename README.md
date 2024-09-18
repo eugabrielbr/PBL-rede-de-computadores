@@ -1,4 +1,5 @@
-
+<h1>Sobre o projeto</h1>
+<p>Este projeto foi desenvolvido como parte da disciplina MI — Concorrência e Conectividade do curso de Engenharia de Computação da Universidade Estadual de Feira de Santana (UEFS). Ele representa um sistema de compra de passagens aéreas, criado para explorar conceitos de concorrência e conectividade em rede de computadores.</p>
 <div id = "introducao"> 
   <h1>Introdução</h1>
   <p> 
