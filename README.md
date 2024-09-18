@@ -35,7 +35,7 @@
 <p align="center"><strong>Figura 1. Fluxograma de comunicação</strong></p>
 
 <p>
-A solução desenvolvida segue o modelo clássico de comunicação cliente-servidor e servidor-cliente, onde o cliente faz login na aplicação e solicita uma ou mais compras de passagens. De forma assíncrona, o servidor processa a compra e retorna o status ao cliente. A seguir, é apresentada uma explicação mais detalhada dos componentes implementados e como está funcionando para atingir o seu papel na solução.
+A solução desenvolvida segue o modelo clássico de comunicação cliente-servidor, onde o cliente faz login na aplicação e solicita uma ou mais compras de passagens. De forma assíncrona, o servidor processa a compra e retorna o status ao cliente. A seguir, é apresentada uma explicação mais detalhada dos componentes implementados e como está funcionando para atingir o seu papel na solução.
 </p>
 
   <h3>Componentes principais</h3>
