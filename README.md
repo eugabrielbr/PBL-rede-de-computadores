@@ -12,6 +12,11 @@
   <li><a href="https://github.com/eugabrielbr">Gabriel Silva dos Santos</a></li>
 </ul>
 
+<h2>Tutor</h2>
+<uL>
+  <li>Prof. Me. Antonio Augusto Teixeira Ribeiro Coutinho (UEFS)</li>
+</ul>
+
 <h2>Sumário</h2>
 <div id="sumario">
 <ul>
