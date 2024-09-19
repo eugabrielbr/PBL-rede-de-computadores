@@ -60,11 +60,38 @@ A solução desenvolvida segue o modelo clássico de comunicação cliente-servi
   <p><strong>Processo de login:</strong> Após receber uma solicitação de login, o servidor verifica se o cliente já está conectado. Se não estiver, permite a conexão; caso contrário, rejeita.</p>
   <p><strong>Gerenciamento de Trechos e Clientes:</strong> Os dados de clientes e trechos são armazenados em um arquivo JSON. O servidor carrega e manipula essas informações, permitindo que os clientes vejam trechos disponíveis e façam compras.</p>
   <p><strong>Tratamento de requisições:</strong> O servidor processa pedidos como visualização de trechos, busca de rotas e compras, e responde conforme os dados do sistema.</p>
-  <p><strong>Encerramento de conexões:</strong>Ao finalizar a interação, o servidor remove o cliente da lista de conectados e fecha a conexão.</p>
+  <p><strong>Encerramento de conexões:</strong> Ao finalizar a interação, o servidor remove o cliente da lista de conectados e fecha a conexão.</p>
   <p><strong>Uso de grafo:</strong> O grafo é usado para representar as cidades e os trechos entre elas. Cada cidade é um nó, e as arestas conectando as cidades têm informações sobre o trecho, como preço, distância e vagas. O programa faz uma busca em profundidade (DFS) no grafo, explorando todas as rotas possíveis entre a origem e o destino. Para cada rota, o servidor calcula o preço total e retorna todas as opções de viagem disponíveis. Quando um cliente compra um trecho, o servidor diminui o número de vagas disponíveis no grafo, atualizando assim a disponibilidade de passagens em tempo real.</p>
   <p><strong>Gerenciamento do arquivo JSON:</strong> O servidor carrega e salva os dados de trechos e clientes no formato JSON, garantindo que as informações persistam e sejam atualizadas de forma segura.</p>
   <p><strong>Serialização de Dados com pickle:</strong> Para enviar e receber os dados complexos de clientes e trechos, o servidor utiliza a biblioteca pickle, facilitando a comunicação eficiente entre o servidor e os clientes.
+
 </p>
+
+
+<h3>Paradigma de comunicação</h3>
+
+<p>
+  O paradigma implementado na solução do problema é o stateful; ou seja: quando o cliente conecta com o servidor, ele não precisa enviar a cada requisição todas as informações necessárias para ver algum trecho ou efetuar alguma compra. Dessa forma, o usuário só precisa enviar uma informação por vez (cpf, origem de viagem, destino de viagem, número de passagens, etc) de acordo com a necessidade da requisição atual, já que o programa o mantém conectado e com suas informações “carregadas” e atualizadas enquanto estiver online com o servidor. Segue abaixo, em específico, aplicações que provam o paradigma adotado. 
+</p>
+
+<p><strong>Manutenção da Conexão e Login: </strong>O cliente se conecta ao servidor e mantém uma conexão aberta enquanto realiza várias operações, como consultar trechos e efetuar compras. O estado do cliente, como o CPF e a sessão de login, é mantido no servidor enquanto a conexão permanece ativa.
+</p>
+<p><strong>Lista de Clientes Conectados: </strong>O servidor mantém uma lista dos clientes conectados, verificando se o cliente já está logado antes de permitir uma nova conexão.</p>
+<p><strong>Manutenção do Estado das Compras e Trechos: </strong>O estado da compra e os trechos escolhidos são mantidos ao longo da sessão, permitindo que o cliente navegue entre diferentes opções e finalize a compra posteriormente, sem perder o contexto; ou seja, quando o cliente efetua a compra, essa informação é diretamente atrelada ao seu objeto, independente de qual ação ele esteja realizando no momento.
+</p>
+<p><strong>Sessão de Conexão: </strong>O cliente continua conectado ao servidor enquanto navega pelos menus, consulta trechos e faz compras. O estado do cliente é mantido no servidor durante toda a sessão, e o cliente pode realizar múltiplas operações sem precisar se autenticar novamente ou enviar todos os dados anteriores.
+</p>
+
+<p>A escolha desse paradigma foi devido ao suas vantagens, como: </p>
+
+<ul>
+  <li>Manter um controle melhor de um usuário durante toda a execução da aplicação</li>
+  <li>Mais intuitivo, já que os dados de cada entidade são mantidos independente de uma nova requisição</li>
+  <li>Reduz a necessidade de enviar informações repetitivas, já que na implementação atual muitas trocas de informações são feitas na interação cliente-servidor</li>
+  <li>Se por acaso o cliente desconectar, mas tenha conseguido ao menos efetuar a compra, ela ficará salva e visível para o cliente em uma próxima conexão (SE DIOGO IMPLEMENTAR NE)  
+</li>
+</ul>
+
 
 </div>
 
