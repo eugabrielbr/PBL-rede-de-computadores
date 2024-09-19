@@ -2,6 +2,7 @@ import socket
 import pickle
 from cliente import Cliente
 import json
+import threading
 
 caminho_arquivo = "trechos_viagem.json"
 
@@ -20,27 +21,65 @@ def salvar_trecho(trechos):
     dados["trechos"] = trechos
     salvar_json(dados, caminho_arquivo)
 
-def salvar_clientes(clientes):
-    dados = carregar_json(caminho_arquivo)
-    dados["clientes"] = clientes
-    salvar_json(dados, caminho_arquivo)
+def salvar_clientes(clientes, lock):
+    with lock:
+        dados = carregar_json(caminho_arquivo)
+        dados["clientes"] = clientes
+        salvar_json(dados, caminho_arquivo)
 
-def carregar_clientes():
-    dados = carregar_json(caminho_arquivo)
-    return dados["clientes"]
+def carregar_clientes(lock):
+    with lock:
+        dados = carregar_json(caminho_arquivo)
+        return dados["clientes"].copy()
 
-def editar_trecho(caminho, trechos_viagem):
-    trecho = caminho["caminho"]
-    print(trechos_viagem[trecho[0]][trecho[1]]["vagas"])
-    while len(trecho) > 1:
-        if trechos_viagem[trecho[0]][trecho[1]]["vagas"] > 0:
-            trechos_viagem[trecho[0]][trecho[1]]["vagas"] -= 1
-            print(trechos_viagem[trecho[0]][trecho[1]]["vagas"])
-            trecho.pop(0)
-        elif trechos_viagem[trecho[0]][trecho[1]]["vagas"] < 1:
-            return False
-    salvar_trecho(trechos_viagem)
+def carregar_trechos(lock):
+    dados = carregar_json(caminho_arquivo)
+    return dados["trechos"].copy()
+
+def editar_trecho(caminho, cliente_conectado, lock):
+    with lock:
+        trechos_viagem = carregar_trechos(lock)
+        trecho = caminho["caminho"]
+        print(trechos_viagem[trecho[0]][trecho[1]]["vagas"])
+        while len(trecho) > 1:
+            if trechos_viagem[trecho[0]][trecho[1]]["vagas"] > 0:
+                trechos_viagem[trecho[0]][trecho[1]]["vagas"] -= 1
+                print(trechos_viagem[trecho[0]][trecho[1]]["vagas"])
+                trecho.pop(0)
+            elif trechos_viagem[trecho[0]][trecho[1]]["vagas"] < 1:
+                return False
+        salvar_trecho(trechos_viagem)
+    adicionar_trecho_cliente(cliente_conectado, trecho, lock)
     return True
+
+def inicializar_clientes():
+    # Inicializa a lista de clientes conectados
+    return []
+
+def adicionar_cliente_conectado(cliente, lista_clientes, lock):
+    with lock:
+        lista_clientes.append(cliente)
+
+def remover_cliente_conectado(cliente, lista_clientes, lock):
+    with lock:
+        lista_clientes.remove(cliente)
+
+def listar_clientes(lista_clientes, lock):
+    with lock:  # Garante que apenas uma thread por vez entre aqui
+        return lista_clientes.copy()  # Use copy() para evitar problemas de leitura simultânea
+
+def adicionar_trecho_cliente(cpf, trecho, lock):
+    clientes = carregar_clientes(lock)
+    with lock:
+        for obj in clientes:
+            if(obj.cpf == cpf):
+                obj.trechos.append(trecho)
+                return True
+        return False
+
+        
+
+
 
 def busca_possibilidades(grafo, origem, destino):
     """Busca todas as possibilidades de rotas de origem a destino, incluindo o preço total."""
@@ -67,14 +106,16 @@ def busca_possibilidades(grafo, origem, destino):
     dfs(origem, [], set(), 0)
     return rotas
 
+
 def start_server(host='localhost', port=1080):
     """Inicia o servidor para aceitar conexões de clientes e processar dados."""
-    clientes_conectados = []
+    lock = threading.Lock()
+    clientes_conectados = inicializar_clientes()
     dados = carregar_json(caminho_arquivo)
     print(dados)
     clientes = dados["clientes"]
     trechos_viagem = dados["trechos"]
-    salvar_json({"clientes": clientes, "trechos": trechos_viagem}, caminho_arquivo)
+    print("Chegou1")
     
     try:
         socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -82,100 +123,137 @@ def start_server(host='localhost', port=1080):
         socket_server.listen(5)
         print(f"Disponível em {host}:{port}")
 
-
-
-        while True: 
+        # Loop para aceitar conexões de clientes
+        while True:
+            print("Chegou2")
             client_socket, client_address = socket_server.accept()
-            print(f"Conectado com {client_address}")
-            # Recebendo dados de login:
-            try:
-                clientes = carregar_clientes
-                data_login = client_socket.recv(4096)
-                obj_login = pickle.loads(data_login)
-                if obj_login[0] == "consulta":
-                    dados = carregar_json(caminho_arquivo)
-                    cliente_consultado = None
-                    if len(dados["clientes"]) != 0:
-                        for cliente in clientes:
-                            if(cliente.cpf == obj_login[1]):
-                                cliente_consultado = cliente
-                                break
-                    if(cliente_consultado is None):
-                        cliente_consultado = Cliente(obj_login[1], [])
-                    data_send = pickle.dumps(cliente_consultado)
-                    client_socket.sendall(data_send)
-                    print(f"Foi:{cliente_consultado}")
-                data_login = client_socket.recv(4096)
-                obj_login = pickle.loads(data_login)
-                # Se o cliente já está conectado em outro IP ou no mesmo, ele é desconectado
-                liberado = True
-                for obj in clientes_conectados:
-                    if (obj_login.cpf == obj.cpf):
-                        client_socket.sendall(pickle.dumps(False))
-                        print(f"conexao com {obj_login.cpf} negada. Motivo: cliente já está conectado")
-                        client_socket.close()
-                        block = False
-                        liberado = False
-                        break
-                if(liberado):
-                    client_socket.sendall(pickle.dumps(True))
-                    print(f"conexao com o cliente {obj_login.cpf} estabelecida")
-                    cliente_conectado = obj_login
-                    clientes_conectados.append(cliente_conectado)
-                    block = True
-                    #salvar_clientes(clientes)
-
-            except (pickle.PickleError, socket.error) as e:
-                print(f"Erro na comunicação conc: {e}")
-            
-            
-            if block:
-                while True:
-                    try:
-                        data = client_socket.recv(4096)
-                        if not data:
-                            break
-
-                        obj = pickle.loads(data)
-                        print(f"Dados recebidos: {obj}")
-
-                        if obj == "trechos":
-                            new_obj = trechos_viagem
-                        elif obj[0] == "compra":
-                            compra = editar_trecho(obj[1], trechos_viagem)
-                            if compra:
-                                cliente_conectado.trechos.append(obj[1])
-                        elif obj[0] == "viagem":
-                            cidade1, cidade2 = obj[1]
-                            new_obj = busca_possibilidades(trechos_viagem, cidade1, cidade2)
-
-                        data_send = pickle.dumps(new_obj)
-                        client_socket.sendall(data_send)
-
-                    except (pickle.PickleError, socket.error) as e:
-                        print(f"Erro na comunicação: {e}")
-                        break
-
-                    dados = carregar_json(caminho_arquivo)
-                    clientes = dados["clientes"]
-                    trechos_viagem = dados["trechos"]
-
-                print(f"antes{clientes_conectados}")
-                #if cliente_conectado in clientes_conectados:
-                for cliente_iterator in clientes_conectados:
-                    if (cliente_conectado.cpf == cliente_iterator.cpf):
-                        client_socket.close()
-                        cliente_copia = cliente_iterator
-                        break
-                clientes_conectados.remove(cliente_copia)
-                print(f"depois{clientes_conectados}")
-
+            print("Chegou3")
+            thread = threading.Thread(target=thread_cliente, args=(client_socket, client_address, clientes_conectados, lock))
+            thread.start()
 
     except (socket.error, Exception) as e:
         print(f"Erro ao iniciar o servidor: {e}")
 
+def thread_cliente(client_socket, client_address, clientes_conectados, lock):
+    #client_socket, client_address = socket_server.accept()
+    """Função que lida com cada cliente em uma nova thread."""
+    print("consigo ver")
+    cliente_conectado = checar_conexao(client_socket, clientes_conectados, lock)
+    print(f"Conectado com {client_address}")
+    with lock:
+        dados = carregar_json(caminho_arquivo)
+    print(dados)
+    clientes = dados["clientes"]
+    trechos_viagem = dados["trechos"]
+
+    # Recebendo dados de login:
+    try:
+        # Inicia o loop de comunicação com o cliente 
+        while True:
+            if(cliente_conectado is None):
+                break
+            try:
+                data = client_socket.recv(4096)
+                if not data:
+                    break
+
+                obj = pickle.loads(data)
+                print(f"Dados recebidos: {obj}")
+
+                if obj == "trechos":
+                    new_obj = trechos_viagem
+                elif obj[0] == "compra":
+                    compra = editar_trecho(obj[1], cliente_conectado, lock)
+                    if(compra): 
+                        new_obj = True
+                    else:
+                        new_obj = False          
+                elif obj[0] == "viagem":
+                    cidade1, cidade2 = obj[1]
+                    new_obj = busca_possibilidades(trechos_viagem, cidade1, cidade2)
+                elif obj == "saida":
+                    print('aqui po')
+                    break
+                data_send = pickle.dumps(new_obj)
+                client_socket.sendall(data_send)
+
+            except (pickle.PickleError, socket.error) as e:
+                print(f"Erro na comunicação: {e}")
+                break
+            with lock:
+                dados = carregar_json(caminho_arquivo)
+            clientes = dados["clientes"]
+            trechos_viagem = dados["trechos"]
+        if(cliente_conectado is not None):
+            for cliente_iterator in clientes_conectados:
+                if (cliente_conectado == cliente_iterator.cpf):
+                    cliente_copia = cliente_iterator
+                    break
+            print(f"Cliente de CPF {cliente_copia.cpf} foi desconectado.")
+            remover_cliente_conectado(cliente_copia, clientes_conectados, lock)
+            client_socket.close()
+
+
+
+    except (pickle.PickleError, socket.error) as e:
+        print(f"Erro na comunicação com o cliente: {e}")
+
+def checar_conexao(client_socket, clientes_conectados, lock):
+    # Recebendo dados de login:
+    try:
+        while True:
+            print("consigo ver")
+            clientes = carregar_clientes(lock)
+            print('isso')
+            data_login = client_socket.recv(4096)
+            obj_login = pickle.loads(data_login)
+            print(obj_login)
+            print('recebi')
+            # Processo de consulta de cliente
+            if obj_login[0] == "consulta":
+                dados = carregar_json(caminho_arquivo)
+                cliente_consultado = None
+                if len(dados["clientes"]) != 0:
+                    for cliente in clientes:
+                        if(cliente.cpf == obj_login[1]):
+                            cliente_consultado = cliente
+                            break
+                if(cliente_consultado is None):
+                    cliente_consultado = Cliente(obj_login[1], [])
+                data_send = pickle.dumps(cliente_consultado)
+                client_socket.sendall(data_send)
+                print(f"Foi:{cliente_consultado}")
+
+            # Recebendo novo login
+            data_login = client_socket.recv(4096)
+            obj_login = pickle.loads(data_login)
+
+            # Verifica se o cliente já está conectado
+            liberado = True
+            for obj in clientes_conectados:
+                if (obj_login.cpf == obj.cpf):
+                    client_socket.sendall(pickle.dumps(False))
+                    print(f"conexao com {obj_login.cpf} negada. Motivo: cliente já está conectado")
+                    liberado = False
+                    print('aqui2')
+                    #break
+            print("Chegou")
+            if(liberado):
+                client_socket.sendall(pickle.dumps(True))
+                print(f"conexao com o cliente {obj_login.cpf} estabelecida")
+                #clientes_conectados.append(cliente_conectado)
+                adicionar_cliente_conectado(obj_login, clientes_conectados, lock)
+                print("Chegou")
+                print('aqui')
+
+                return obj_login.cpf
+                #salvar_clientes(clientes)
+
+    except (pickle.PickleError, socket.error) as e:
+        print(f"Erro na comunicação com o cliente: {e}")
+
+
 def main():
-    
     start_server()
 
 if __name__ == "__main__":
