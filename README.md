@@ -92,6 +92,37 @@ A solução desenvolvida segue o modelo clássico de comunicação cliente-servi
 </li>
 </ul>
 
+<h3>Protocolo de comunicação</h3>
+
+<p>O protocolo de comunicação de rede adotado na solução do projeto é o TCP/IP, que combina os protocolos TCP (Transmission Control Protocol) e IP (Internet Protocol). Com esse protocolo, é possível enviar mensagens para o servidor por meio de uma conexão via socket, garantindo a entrega confiável e ordenada dos dados. Segue um esquema na Figura 2 mostrando como o protocolo funciona e sua relação com os sockets.</p>
+
+<div align="center"> 
+  <img src = "https://github.com/user-attachments/assets/17af6375-7d9e-423f-84e3-035ceb8b5467" width="450px" />
+</div>
+<p align="center"><strong>Figura 2. Esquema de comunicação via socket</strong></p>
+
+<p>Segue abaixo a ordem de troca de mensagens entre cliente e servidor durante a execução da aplicação em algumas requisições.</p>
+
+<p><strong>Login/autenticação: </strong></p>
+<p>Cliente -> Servidor: cliente envia seu CPF e o tipo de operação, que neste caso é consulta de login</p>
+<p>Servidor -> Cliente: retorna objeto cliente e status de permissão de acesso (True ou False) </p>
+<p><strong>Solicitação para ver trechos:</strong></p>
+<p>Cliente -> Servidor: requisição: trechos</p>
+<p>Servidor -> Cliente: trechos disponíveis</p>
+<p><strong>Busca de possibilidades: </strong></p>
+<p>Cliente -> Servidor: requisição: viagem, origem e destino</p>
+<p>Servidor -> Cliente: trechos disponíveis de acordo com a origem e destino</p>
+<p><strong>Compra de passagens:</strong></p>
+<p>Cliente -> Servidor: requisição: compra, trecho selecionado </p>
+<p>Servidor -> Cliente: status de compra </p>
+
+<h3>Formatação e tratamento de dados</h3>
+
+<p>A formatação de dados utilizada para transmitir informações no código é a serialização com pickle. A biblioteca pickle permite transformar objetos Python em uma sequência de bytes, que pode ser facilmente enviada entre o cliente e o servidor por meio de sockets. Assim, os dados são serializados no lado do cliente e deserializados no lado do servidor (e vice-versa), mantendo a integridade das informações.</p>
+<p>Embora seja fácil de implementar e funcione muito bem com programas escritos em Python, se houver a necessidade de lidar com um servidor desenvolvido em outra linguagem, estabelecer a comunicação cliente-servidor pode se tornar mais complexo, uma vez que a biblioteca pickle é específica para Python.</p>
+<p>A escolha desse método de comunicação foi uma decisão de projeto, visando a comunicação via objetos, o que exige uma biblioteca específica para Python para a serialização e deserialização dos dados</p>
+
+
 
 </div>
 
