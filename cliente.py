@@ -170,9 +170,9 @@ def menu(client_socket):
 
                     objeto_recebido = pickle.loads(data)
                     for caminho in objeto_recebido:
-                            stringteste = " -> ".join(objeto_recebido[caminho]['caminho'])
-                            print(f"Trajeto {caminho}:\n{stringteste}\nValor: R${objeto_recebido[caminho]['preco_total']}")
-                            print()
+                        stringteste = " -> ".join(objeto_recebido[caminho]['caminho'])
+                        print(f"Trajeto {caminho}:\n{stringteste}\nValor: R${objeto_recebido[caminho]['preco_total']}")
+                        print()
                     if not objeto_recebido:
                         print("Não há trechos disponíveis para realizar essa viagem.")
                     else:
@@ -200,6 +200,8 @@ def menu(client_socket):
                 
                 input("Pressione Enter para voltar ao menu principal...")
             elif escolha == '3':
+                obj1 = pickle.dumps(("saida"))
+                client_socket.sendall(obj1)
                 limpar_tela()
                 print("="*30)
                 print("   Saindo do programa...")
@@ -224,7 +226,7 @@ def login(client_socket):
         client_socket.sendall(obj)
         data = client_socket.recv(4096)
         cliente_recebido = pickle.loads(data)
-        print(f"{cliente_recebido} -> dado recebido do servidor.")  
+        print(f"{cliente_recebido} -> dado recebido do servidor.")
         # Verificando cliente logado
         try:
             obj_cliente = pickle.dumps(cliente_recebido)
@@ -234,7 +236,7 @@ def login(client_socket):
 
         data_ver = client_socket.recv(4096)
         data_ver = pickle.loads(data_ver)
-        if(data_ver==True):
+        if(data_ver is True):
             valido = False
         else:
             print("CPF já está logado no servidor")
