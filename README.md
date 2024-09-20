@@ -122,6 +122,47 @@ A solução desenvolvida segue o modelo clássico de comunicação cliente-servi
 <p>Embora seja fácil de implementar e funcione muito bem com programas escritos em Python, se houver a necessidade de lidar com um servidor desenvolvido em outra linguagem, estabelecer a comunicação cliente-servidor pode se tornar mais complexo, uma vez que a biblioteca pickle é específica para Python.</p>
 <p>A escolha desse método de comunicação foi uma decisão de projeto, visando a comunicação via objetos, o que exige uma biblioteca específica para Python para a serialização e deserialização dos dados</p>
 
+<h3>Tratamento de conexões simultâneas</h3>
+
+<p>O sistema implementa threads para lidar com as conexões simultâneas. Segue abaixo o detalhamento delas: </p>
+
+<h4>Threads</h4>
+
+<p>As threads em Python são utilizadas para realizar a execução simultânea de múltiplas tarefas dentro de um mesmo processo. Isso permite que diferentes partes de um programa rodem "ao mesmo tempo", sendo útil para lidar com tarefas que podem ser executadas de forma independente, como, por exemplo, a conexão de diversos clientes em um mesmo período de tempo.
+Na solução do problema, especificamente na função que estabelece a conexão com um usuário, é criada uma nova thread para cada cliente, por meio da biblioteca threading. Isso garante que não ocorra um problema que foi frequente durante os testes: a necessidade de um cliente se desconectar para que outro possa fazer login. Mais detalhes sobre a implementação na documentação do projeto. 
+</p>
+
+<h3>Tratamento de concorrência</h3>
+
+<p>O sistema implementa mutexes para lidar com as concorrência. Segue abaixo o detalhamento sobre: </p>
+
+<h4>Mutex (lock) </h4>
+
+<p>A biblioteca threading também oferece ferramentas para lidar com a concorrência de acesso de recursos, garantindo assim que nenhuma inconsistência de dados ocorra. Os mutexes foram utilizados nos seguintes contextos: </p>
+
+<p><strong>Salvar cliente e carregar cliente:</strong> tanto no momento de salvar um novo cliente quanto ao verificar se ele já está presente no banco de dados (JSON), o lock bloqueia o acesso, impedindo que múltiplas threads acessem o arquivo simultaneamente.
+</p>
+<p><strong>Adicionar cliente:</strong> no servidor, há uma lista de clientes que auxilia na verificação de clientes conectados. Como não é permitido que dois clientes com o mesmo CPF acessem o sistema simultaneamente, foi implementado um lock para evitar essa situação.
+</p>
+<p><strong>Editar trecho:</strong> durante a compra de passagens, um lock também é utilizado para garantir que o arquivo seja atualizado corretamente na etapa de modificação das vagas disponíveis, evitando inconsistências no número de vagas e garantindo uma atualização coerente.</p>
+<p><strong>Verificar clientes conectados:</strong> foi adicionado um lock também no momento de verificar se o cliente que está solicitando conexão já está conectado. Dessa forma, apesar de ser um acontecimento raro, o cliente não tentará fazer uma conexão multiplica com o mesmo CPF ao mesmo tempo, evitando possíveis bugs. 
+</p>
+
+<h3>Desempenho</h3>
+
+<p>Para melhorar o desempenho, foi implementado threads com o mesmo objetivo já citado anteriormente: permitir conexões simultâneas. A melhora foi evidente porque no cenário anterior quando as threads ainda não haviam sido implementadas, um cliente precisaria esperar o outro desconectar para assim conseguir estabelecer a conexão com o servidor e efetuar alguma tarefa. Essa solução melhorou consideravelmente o throughput total.</p>
+<p>Para efetuar os testes, foi utilizado um arquivo bat, onde nele é possível executar comandos de execução no terminal e simular vários clientes tentando se conectar ao mesmo tempo. Segue um exemplo dos comandos abaixo: </p>
+
+
+```bat
+start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python servidor.py && pause" REM inicia o servidor 
+start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python cliente.py 112132312 && pause" REM conecta o cliente 1 
+start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python cliente.py 243536366 && pause" REM conecta o cliente 2 
+start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python cliente.py 376586588 && pause" REM conecta o cliente 3 
+start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python cliente.py 476345232 && pause" REM conecta o cliente 4 
+start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python cliente.py 589736455 && pause" REM conecta o cliente 5 
+```
+<p>No script acima, é iniciado o servidor e depois cinco clientes distintos são conectados em sequência.</p>
 
 
 </div>
