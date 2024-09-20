@@ -7,6 +7,12 @@ class Cliente:
     def __init__(self, cpf, trechos):
         self.cpf = cpf
         self.trechos = trechos
+    
+    def to_dict(self):
+        return {
+            'cpf': self.cpf,
+            'trechos': self.trechos
+        }
 
 def start_client(host='localhost', port=1080):
     """Cria e conecta o socket do cliente."""
@@ -221,7 +227,7 @@ def menu(client_socket):
 def login(client_socket):
     valido = True
     while(valido):
-        cpf = input("Insira CPF: ")
+        cpf = str(input("Insira CPF: "))
         obj = pickle.dumps(("consulta", cpf))
         client_socket.sendall(obj)
         data = client_socket.recv(4096)
