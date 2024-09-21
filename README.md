@@ -164,6 +164,327 @@ start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python client
 ```
 <p>No script acima, é iniciado o servidor e depois cinco clientes distintos são conectados em sequência.</p>
 
+<div align="center"> 
+  <img src = "https://github.com/user-attachments/assets/149e75ce-9001-49f1-b1e6-8d1de9423ae4" width="550px" />
+</div>
+<p align="center"><strong>Figura 3. Clientes conectados e servidor rodando de fundo</strong></p>
+
+
+<h3>Confiabilidade da solução</h3>
+<h3>Emprego do docker</h3>
+<h3>Documentação do código </h3>
+<p>Esta seção apresenta a documentação completa do código, detalhando seus métodos, parâmetros o objetivos </p>
+<h3>Cliente</h3>
+<p>Documentação cliente</p>
+
+<h3>Classe</h3>
+
+<h4>Cliente</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Representa um cliente com CPF e trechos.</li>
+    <li><strong>Métodos:</strong>
+        <ul>
+            <li><code>__init__(cpf, trechos)</code>: Inicializa o cliente.</li>
+            <li><code>to_dict()</code>: Retorna os dados do cliente em formato de dicionário.</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>Funções</h3>
+
+<h4>start_client</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Cria e conecta o socket do cliente.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>host</code>: Endereço do servidor .</li>
+            <li><code>port</code>: Porta do servidor .</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>limpar_tela</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Limpa a tela do terminal.</li>
+</ul>
+
+<h4>exibir_menu</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Exibe o menu principal.</li>
+</ul>
+
+<h4>ver_trechos</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Simula a visualização de trechos.</li>
+</ul>
+
+<h4>selecionar_origem</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Seleciona a cidade de origem.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>opcao</code>: Opção escolhida pelo usuário.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>print_cidades</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Imprime as cidades disponíveis.</li>
+</ul>
+
+<h4>compra_menu</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Simula o processo de compra.</li>
+    <li><strong>Retorno:</strong> Cidades de origem e destino escolhidas.</li>
+</ul>
+
+<h4>menu</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Exibe o menu e processa a escolha do usuário.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>client_socket</code>: Socket do cliente.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>login</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Realiza o login do cliente.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>client_socket</code>: Socket do cliente.</li>
+        </ul>
+    </li>
+    <li><strong>Retorno:</strong> Status de verificação de login.</li>
+</ul>
+
+<h4>main</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Inicia o cliente.</li>
+</ul>
+
+<h3>Servidor</h3>
+<p>Documentação servidor</p>
+
+<h3>Funções</h3>
+
+<h4>salvar_json</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Salva dados em um arquivo JSON.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>dados</code>: Dados a serem salvos.</li>
+            <li><code>caminho_arquivo</code>: Caminho do arquivo onde os dados serão salvos.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>carregar_json</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Carrega dados de um arquivo JSON.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>caminho_arquivo</code>: Caminho do arquivo a ser carregado.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>salvar_trecho</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Salva os trechos de viagem no arquivo JSON.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>trechos</code>: Trechos a serem salvos.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>salvar_clientes</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Salva os clientes no arquivo JSON.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>clientes</code>: Lista de clientes a serem salvos.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>carregar_clientes</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Carrega a lista de clientes do arquivo JSON.</li>
+    <li><strong>Retorno:</strong> Lista de objetos Cliente.</li>
+</ul>
+
+<h4>carregar_trechos</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Carrega os trechos de viagem do arquivo JSON.</li>
+    <li><strong>Retorno:</strong> Cópia dos trechos.</li>
+</ul>
+
+<h4>editar_trecho</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Edita o trecho, diminuindo as vagas disponíveis.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>caminho</code>: Caminho do trecho a ser editado.</li>
+            <li><code>cliente_conectado</code>: CPF do cliente conectado.</li>
+            <li><code>lock</code>: Lock para garantir acesso seguro aos dados.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>adicionar_cliente_arquivo</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Adiciona ou atualiza um cliente no arquivo JSON.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>cliente</code>: Cliente a ser adicionado ou atualizado.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>encontrar_cliente</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Encontra um cliente na lista.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>cliente</code>: Cliente a ser encontrado.</li>
+        </ul>
+    </li>
+    <li><strong>Retorno:</strong> Cliente encontrado ou None.</li>
+</ul>
+
+<h4>inicializar_clientes</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Inicializa a lista de clientes conectados.</li>
+    <li><strong>Retorno:</strong> Lista vazia.</li>
+</ul>
+
+<h4>adicionar_cliente_conectado</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Adiciona um cliente à lista de conectados.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>cliente</code>: Cliente a ser adicionado.</li>
+            <li><code>lista_clientes</code>: Lista de clientes conectados.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>remover_cliente_conectado</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Remove um cliente da lista de conectados.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>cliente</code>: Cliente a ser removido.</li>
+            <li><code>lista_clientes</code>: Lista de clientes conectados.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>listar_clientes</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Lista os clientes conectados.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>lista_clientes</code>: Lista de clientes conectados.</li>
+            <li><code>lock</code>: Lock para acesso seguro.</li>
+        </ul>
+    </li>
+    <li><strong>Retorno:</strong> Cópia da lista de clientes conectados.</li>
+</ul>
+
+<h4>adicionar_trecho_cliente</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Adiciona um trecho à lista de trechos de um cliente.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>cpf</code>: CPF do cliente.</li>
+            <li><code>trecho</code>: Trecho a ser adicionado.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>busca_possibilidades</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Busca todas as possibilidades de rotas entre origem e destino.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>grafo</code>: Grafo das cidades e seus trechos.</li>
+            <li><code>origem</code>: Cidade de origem.</li>
+            <li><code>destino</code>: Cidade de destino.</li>
+        </ul>
+    </li>
+    <li><strong>Retorno:</strong> Rotas disponíveis entre as cidades.</li>
+</ul>
+
+<h4>start_server</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Inicia o servidor para aceitar conexões de clientes.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>host</code>: Endereço do servidor .</li>
+            <li><code>port</code>: Porta do servidor .</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>thread_cliente</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Lida com a comunicação de cada cliente em uma nova thread.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>client_socket</code>: Socket do cliente.</li>
+            <li><code>client_address</code>: Endereço do cliente.</li>
+            <li><code>clientes_conectados</code>: Lista de clientes conectados.</li>
+            <li><code>lock</code>: Lock para acesso seguro.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>checar_conexao</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Verifica se um cliente já está conectado e realiza o login.</li>
+    <li><strong>Parâmetros:</strong>
+        <ul>
+            <li><code>client_socket</code>: Socket do cliente.</li>
+            <li><code>clientes_conectados</code>: Lista de clientes conectados.</li>
+            <li><code>lock</code>: Lock para acesso seguro.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>main</h4>
+<ul>
+    <li><strong>Objetivo:</strong> Inicia o servidor.</li>
+</ul>
+
+
 
 </div>
+
+<div id = "resultados">
+<h2>Resultados</h2>
+</div>
+
+<div id = "conclusao"> 
+  <h2>Conclusão</h2>
+  <p>O sistema desenvolvido é uma aplicação cliente-servidor que gerencia trechos de viagem e possibilita a compra de passagens de forma eficiente e interativa. A estrutura do código permite uma comunicação robusta entre cliente e servidor, utilizando sockets para transmissão de dados e pickle para serialização de objetos, garantindo a integridade das informações trocadas.</p>
+<p>A implementação do cliente proporciona uma interface amigável, onde o usuário pode visualizar os trechos disponíveis e realizar compras de forma simplificada. Além disso, a lógica de verificação de login assegura que cada cliente tenha uma experiência personalizada, evitando conflitos de acesso simultâneo.</p>
+
+<p>No lado do servidor, a funcionalidade de gerenciamento de clientes e trechos é otimizada por meio de operações em arquivos JSON, permitindo a persistência de dados e facilitando a manipulação de informações sobre as viagens. A utilização de threads garante que múltiplos clientes possam ser atendidos simultaneamente, aumentando a eficiência do sistema.
+</p>
+
+<p>Em suma, o projeto demonstra uma abordagem bem-sucedida para a criação de um sistema de reservas de passagens, combinando uma interface de usuário intuitiva com um backend eficiente e seguro. Futuras melhorias podem incluir a adição de funcionalidades como uma interface gráfica para melhor interação e experiência  do cliente. </p>
+
+
+</div>
+
+<div id = "referencias"> 
+  <h2>Referências</h2>
+</div>
+
+
 
