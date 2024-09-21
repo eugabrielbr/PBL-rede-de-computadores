@@ -18,12 +18,6 @@
   <li>Prof. Me. Antonio Augusto Teixeira Ribeiro Coutinho (UEFS)</li>
 </ul>
 
-<h2>Sumário</h2>
-<div id="sumario">
-<ul>
-</ul>
-</div>
-
 <h2>Metodologia</h2>
 <div id="metodologia">
 
@@ -484,7 +478,13 @@ start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python client
 
 <div id = "referencias"> 
   <h2>Referências</h2>
+
+  <p>EXACTA WORKS. Stateless vs. stateful. Medium, 2021. Disponível em: https://medium.com/exactaworks/stateless-vs-stateful-f596a6b6471d. Acesso em: 21 set. 2024.</p>
+ <p> PYTHON SOFTWARE FOUNDATION. Biblioteca de Sockets. Disponível em: https://docs.python.org/3/library/socket.html. Acesso em: 21 set. 2024.</p>
+<p>URAPYTHON COMMUNITY. Introdução a sockets em Python. Medium, 2019. Disponível em: https://medium.com/@urapython.community/introdu%C3%A7%C3%A3o-a-sockets-em-python-44d3d55c60d0. Acesso em: 21 set. 2024.</p>
+<p>HOSTINGER. O que é TCP/IP. Hostinger, 2024. Disponível em: https://www.hostinger.com.br/tutoriais/tcp-ip. Acesso em: 21 set. 2024.</p>
 </div>
+
 
 
 
