@@ -167,15 +167,15 @@ start cmd /k "cd /d D:\vscode\mi redes\PBL-rede-de-computadores && python client
 <h3>Confiabilidade da solução</h3>
 <h3>Emprego do docker</h3>
 
-<p>O Docker é uma plataforma que permite a criação e execução de contêineres, oferecendo isolamento e consistência em projetos cliente-servidor. Cada contêiner opera de forma independente, garantindo que as aplicações não conflitam, enquanto a portabilidade dos contêineres assegura que funcionem de maneira consistente em diferentes ambientes, como desenvolvimento, teste e produção. Além disso, é possível testar de forma fiel a conexão com multiplos clientes, já que com o docker compose, pode-se criar diversas instâncias do contêiner do cliente, permitindo o teste de várias conexões. Segue a baixo como executar o sistema via docker:  </p>
+<p>O Docker é uma plataforma que permite a criação e execução de contêineres, oferecendo isolamento e consistência em projetos cliente-servidor. Cada contêiner opera de forma independente, garantindo que as aplicações não conflitam, enquanto a portabilidade dos contêineres assegura que funcionem de maneira consistente em diferentes ambientes, como desenvolvimento, teste e produção. Além disso, é possível testar de forma fiel a conexão com multiplos clientes, já que com o docker compose, pode-se criar diversas instâncias do contêiner do cliente, permitindo o teste de várias conexões. Segue abaixo como executar o sistema via docker:  </p>
 
 1. **Construir as imagens Docker:**
-Navegue até a página onde o arquivo docker-compose.yml está e execute o seguinte comando
+Navegue até a pasta onde o arquivo docker-compose.yml está e execute o seguinte comando
     ```bash
     docker compose build
     ```
 
-3. **Contruir contêiner do servidor e executa-lo:**
+3. **Construir contêiner do servidor e executa-lo:**
     ```bash
     docker compose up servidor
     ```
