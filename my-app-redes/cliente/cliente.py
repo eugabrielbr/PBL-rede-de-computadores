@@ -15,10 +15,11 @@ class Cliente:
             'trechos': self.trechos
         }
 
-def start_client(host='172.21.161.97', port=8080):
+def start_client(host='localhost', port=8080):
     """Cria e conecta o socket do cliente."""
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.settimeout(30)
         client_socket.connect((host, port))
         return client_socket
     except socket.error as e:
@@ -35,9 +36,10 @@ def exibir_menu():
     print("="*30)
     print("       MENU PRINCIPAL")
     print("="*30)
-    print("1. Ver Trechos")
-    print("2. Compra")
-    print("3. Sair")
+    print("1. Ver Trechos disponíveis")
+    print("2. Trechos comprados")
+    print("3. Compra")
+    print("4. Sair")
 
     print("="*30)
 
@@ -127,7 +129,7 @@ def menu(client_socket):
             exibir_menu()
             
             
-            escolha = input("Escolha uma opção (1/2/3): ")
+            escolha = input("Escolha uma opção (1/2/3/4): ")
             
             if escolha == '1':
                 ver_trechos()
@@ -159,8 +161,28 @@ def menu(client_socket):
                     print(f"Erro na comunicação: {e}")
                 
                 input("Pressione Enter para voltar ao menu principal...")
-
+            
             elif escolha == '2':
+                try:
+                    obj = pickle.dumps("trechos_cliente")
+                    client_socket.sendall(obj)
+                    # Recebe a resposta do servidor
+                    data = client_socket.recv(4096)
+                    if not data:
+                        print("Nenhum dado recebido do servidor.")
+                        continue
+                    objeto_recebido = pickle.loads(data)
+                    if(len(objeto_recebido) < 1):
+                        print("Você não tem trechos comprados.")
+                    else:
+                        for n_trecho, trecho in objeto_recebido.items():
+                            print(f"{n_trecho}: {trecho}")
+                except (pickle.PickleError, socket.error) as e:
+                    print(f"Erro na comunicação: {e}")
+                
+                input("Pressione Enter para voltar ao menu principal...")
+
+            elif escolha == '3':
                 cidades = compra_menu()
                 if cidades == (None, None):
                     input("Pressione Enter para voltar ao menu principal...")
@@ -203,12 +225,16 @@ def menu(client_socket):
                             print("Nenhum dado recebido do servidor.")
                             continue
                         objeto_recebido = pickle.loads(data)
+                        if(objeto_recebido):
+                            print("Compra realizada com sucesso!")
+                        else:
+                            print("Houve um erro no momento da sua compra, tente novamente.")
 
                 except (pickle.PickleError, socket.error) as e:
                     print(f"Erro na comunicação: {e}")
                 
                 input("Pressione Enter para voltar ao menu principal...")
-            elif escolha == '3':
+            elif escolha == '4':
                 obj1 = pickle.dumps(("saida"))
                 client_socket.sendall(obj1)
                 limpar_tela()

@@ -50,6 +50,13 @@ def carregar_trechos():
     dados = carregar_json(caminho_arquivo)
     return dados["trechos"].copy()
 
+def trechos_cliente(cliente_cpf):
+    clientes = carregar_clientes()
+    for cliente in clientes:
+        if cliente_cpf == cliente.cpf:
+            return cliente.trechos
+    
+
 def editar_trecho(caminho, cliente_conectado, lock):
     with lock:
         trechos_viagem = carregar_trechos()
@@ -66,7 +73,7 @@ def editar_trecho(caminho, cliente_conectado, lock):
         salvar_trecho(trechos_viagem)
         print(caminho["caminho"])
         adicionar_trecho_cliente(cliente_conectado, caminho["caminho"])
-    return True
+        return True
 
 def adicionar_cliente_arquivo(cliente):
     clientes = carregar_clientes()
@@ -147,7 +154,7 @@ def busca_possibilidades(grafo, origem, destino):
     return rotas
 
 
-def start_server(host='0.0.0.0', port=8080):
+def start_server(host='localhost', port=8080):
     """Inicia o servidor para aceitar conexões de clientes e processar dados."""
     lock = threading.Lock()
     clientes_conectados = inicializar_clientes()
@@ -166,9 +173,10 @@ def start_server(host='0.0.0.0', port=8080):
         # Loop para aceitar conexões de clientes
         while True:
             client_socket, client_address = socket_server.accept()
+            client_socket.settimeout(30)
             thread = threading.Thread(target=thread_cliente, args=(client_socket, client_address, clientes_conectados, lock))
             thread.start()
-
+            
     except (socket.error, Exception) as e:
         print(f"Erro ao iniciar o servidor: {e}")
 
@@ -208,7 +216,8 @@ def thread_cliente(client_socket, client_address, clientes_conectados, lock):
                 elif obj[0] == "viagem":
                     cidade1, cidade2 = obj[1]
                     new_obj = busca_possibilidades(trechos_viagem, cidade1, cidade2)
-                    
+                elif obj == "trechos_cliente":
+                    new_obj = trechos_cliente(cliente_conectado)
                 elif obj == "saida":
                     break
                 data_send = pickle.dumps(new_obj)
