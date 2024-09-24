@@ -368,9 +368,7 @@ def login(client_socket):
             while True:
                 cpf = str(input("Insira CPF: "))
 
-                if cpf.isdigit():
-                    break
-                elif len(cpf) == 11:
+                if cpf.isdigit() and len(cpf) == 11:
                     break
                 limpar_tela()
                 print("cpf inválido\n")
