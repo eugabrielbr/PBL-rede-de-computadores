@@ -2,7 +2,10 @@ import socket
 import pickle
 import os
 import sys 
+import time
+import threading
 
+escolha_time = False
 
 class Cliente:
     def __init__(self, cpf, trechos):
@@ -15,16 +18,19 @@ class Cliente:
             'trechos': self.trechos
         }
 
-def start_client(host='localhost', port=8080):
+def start_client(host='192.168.1.156', port=8080):
     """Cria e conecta o socket do cliente."""
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.settimeout(30)
         client_socket.connect((host, port))
         return client_socket
+    except socket.timeout:
+        print(f"falha na conexão, servidor demorou para responder")
     except socket.error as e:
         print(f"Erro ao conectar ao servidor: {e}")
         raise
+
 
 def limpar_tela():
     """Limpa a tela do terminal para uma visualização mais limpa."""
@@ -67,6 +73,8 @@ def selecionar_origem(opcao):
     }
     return switch_origem.get(opcao, "Opção inválida")
 
+
+
 def print_cidades():
     """Imprime as cidades disponíveis para escolha."""
     print("1. São Paulo, SP")
@@ -81,6 +89,9 @@ def print_cidades():
     print("10. Manaus, AM")
 
 def compra_menu():
+
+    global escolha_time
+    
     """Simula o processo de compra."""
     limpar_tela()
     print("="*30)
@@ -114,28 +125,71 @@ def compra_menu():
         return cidade1, cidade2
 
     except ValueError:
+        if escolha_time: 
+            sys.exit()
         print("Opção inválida, utilize os números de 1-10")
         return None, None
 
-def menu(client_socket):
+
+def timeout_checker(last_activity, timeout_event, client_socket, timeout):
+    """Verifica o tempo de inatividade e define o evento de timeout se necessário."""
+    while not timeout_event.is_set():
+        global escolha_time
+        if time.time() - last_activity[0] > timeout:
+            limpar_tela()
+            print("Timeout de inatividade. Encerrando conexão.")
+            escolha_time = True
+            # Envia notificação de timeout para o servidor
+            try:
+                
+                obj_timeout = pickle.dumps("timeout")
+
+                client_socket.sendall(obj_timeout)
+
+            except socket.error as e:
+                print(f"Erro ao enviar notificação de timeout para o servidor: {e}")
+            timeout_event.set()  # Define o evento de timeout
+            break
+        time.sleep(1)  # Verifica a cada segundo
+
+def menu(client_socket,timeout = 50):
     """Função principal que exibe o menu e processa a escolha do usuário."""
     data_ver = login(client_socket)
-   
+    global escolha_time
 
     if data_ver == True:
+         
+        last_activity = [time.time()]  # Usar uma lista para manter a mutabilidade
+        timeout_event = threading.Event()
+
+        # Inicia o thread de verificação de timeout
+        checker_thread = threading.Thread(target=timeout_checker, args=(last_activity, timeout_event, client_socket, timeout))
+        checker_thread.start()
+        
         
         while True:
             
+            
+            if escolha_time:
+                sys.exit()
+                
+         
+
             exibir_menu()
             
-            
             escolha = input("Escolha uma opção (1/2/3/4): ")
-            
+
+          
             if escolha == '1':
+
+
+                if escolha_time: 
+                    sys.exit()
                 ver_trechos()
                 try:
                     obj = pickle.dumps("trechos")
                     client_socket.sendall(obj)
+                    last_activity[0] = time.time()
                     
                     # Recebe a resposta do servidor
                     data = client_socket.recv(4096)
@@ -143,8 +197,15 @@ def menu(client_socket):
                     if not data:
                         print("Nenhum dado recebido do servidor.")
                         continue
-
+                    
+                    
                     objeto_recebido = pickle.loads(data)
+
+                    if objeto_recebido == "timeout":
+                        print("Timeout do servidor. Encerrando conexão.")
+                        timeout_event.set()
+                        break
+
                     # print(f"Objeto recebido do servidor: {objeto_recebido}")
                     i = 1
                     for obj in objeto_recebido.keys():
@@ -161,17 +222,27 @@ def menu(client_socket):
                     print(f"Erro na comunicação: {e}")
                 
                 input("Pressione Enter para voltar ao menu principal...")
+                
             
             elif escolha == '2':
+                if escolha_time: 
+                    sys.exit()
                 try:
                     obj = pickle.dumps("trechos_cliente")
                     client_socket.sendall(obj)
+                    last_activity[0] = time.time()
                     # Recebe a resposta do servidor
                     data = client_socket.recv(4096)
                     if not data:
                         print("Nenhum dado recebido do servidor.")
                         continue
                     objeto_recebido = pickle.loads(data)
+
+                    if objeto_recebido == "timeout":
+                        print("Timeout do servidor. Encerrando conexão.")
+                        timeout_event.set()
+                        break
+
                     if(len(objeto_recebido) < 1):
                         print("Você não tem trechos comprados.")
                     else:
@@ -183,7 +254,12 @@ def menu(client_socket):
                 input("Pressione Enter para voltar ao menu principal...")
 
             elif escolha == '3':
+                
+                if escolha_time: 
+                    sys.exit()
+            
                 cidades = compra_menu()
+                
                 if cidades == (None, None):
                     input("Pressione Enter para voltar ao menu principal...")
                     continue
@@ -191,6 +267,7 @@ def menu(client_socket):
                 try:
                     obj = pickle.dumps(("viagem",cidades))
                     client_socket.sendall(obj)
+                    last_activity[0] = time.time()
                     
                     # Recebe a resposta do servidor
                     data = client_socket.recv(4096)
@@ -200,6 +277,11 @@ def menu(client_socket):
                         continue
 
                     objeto_recebido = pickle.loads(data)
+
+                    if objeto_recebido == "timeout":
+                        print("Timeout do servidor. Encerrando conexão.")
+                        timeout_event.set()
+                        break
                     for caminho in objeto_recebido:
                         stringteste = " -> ".join(objeto_recebido[caminho]['caminho'])
                         print(f"Trajeto {caminho}:\n{stringteste}\nValor: R${objeto_recebido[caminho]['preco_total']}")
@@ -225,6 +307,11 @@ def menu(client_socket):
                             print("Nenhum dado recebido do servidor.")
                             continue
                         objeto_recebido = pickle.loads(data)
+
+                        if objeto_recebido == "timeout":
+                            print("Timeout do servidor. Encerrando conexão.")
+                            timeout_event.set()
+                            break
                         if(objeto_recebido):
                             print("Compra realizada com sucesso!")
                         else:
@@ -234,28 +321,41 @@ def menu(client_socket):
                     print(f"Erro na comunicação: {e}")
                 
                 input("Pressione Enter para voltar ao menu principal...")
+            
             elif escolha == '4':
+               
                 obj1 = pickle.dumps(("saida"))
                 client_socket.sendall(obj1)
+
                 limpar_tela()
                 print("="*30)
                 print("   Saindo do programa...")
                 print("="*30)
+                timeout_event.set()
                 break
-
-        
+                
 
 
             else:
                 limpar_tela()
-                print("="*30)
-                print("   Opção inválida! Tente novamente.")
-                print("="*30)
-                input("Pressione Enter para continuar...")
+                if (escolha_time == True):
+                    sys.exit()
+                else:
+                    print("="*30)
+                    print("Opção inválida, tente novamente")
+                    print("="*30)
+                    input("Pressione Enter para continuar...")
+
+
+        
+        checker_thread.join()  
     else:
         print("Cliente já está logado, tente novamente mais tarde")
 
+    
+
     client_socket.close()
+    
 
 def login(client_socket):
     valido = True
@@ -264,7 +364,17 @@ def login(client_socket):
         if len(sys.argv) > 1:
             cpf = sys.argv[1]
         else: 
-            cpf = str(input("Insira CPF: "))
+            while True:
+                
+                
+                cpf = str(input("Insira CPF: "))
+
+                if cpf.isdigit():
+                    break
+                
+                limpar_tela()
+                print("cpf inválido\n")
+            
             
         obj = pickle.dumps(("consulta", cpf))
         client_socket.sendall(obj)
