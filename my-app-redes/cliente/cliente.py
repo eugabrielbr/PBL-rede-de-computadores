@@ -376,7 +376,6 @@ def login(client_socket):
         client_socket.sendall(obj)
         data = client_socket.recv(4096)
         cliente_recebido = pickle.loads(data)
-        print(f"{cliente_recebido} -> dado recebido do servidor.")
         # Verificando cliente logado
         try:
             obj_cliente = pickle.dumps(cliente_recebido)
