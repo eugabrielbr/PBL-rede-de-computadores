@@ -3,6 +3,7 @@ import pickle
 
 import json
 import threading
+import time
 
 class Cliente:
     def __init__(self, cpf, trechos):
@@ -153,8 +154,9 @@ def busca_possibilidades(grafo, origem, destino):
     dfs(origem, [], set(), 0)
     return rotas
 
-
-def start_server(host='localhost', port=8080):
+# o timeout do servidor serve somente para garantir q o cliente se desconecte em envio muito demorado de pacotes, evitando sobrecarga
+# por isso seu timer é de 100s 
+def start_server(host='0.0.0.0', port=8080, timeout = 100):
     """Inicia o servidor para aceitar conexões de clientes e processar dados."""
     lock = threading.Lock()
     clientes_conectados = inicializar_clientes()
@@ -173,14 +175,15 @@ def start_server(host='localhost', port=8080):
         # Loop para aceitar conexões de clientes
         while True:
             client_socket, client_address = socket_server.accept()
-            client_socket.settimeout(30)
-            thread = threading.Thread(target=thread_cliente, args=(client_socket, client_address, clientes_conectados, lock))
+            client_socket.settimeout(timeout)
+            thread = threading.Thread(target=thread_cliente, args=(client_socket, client_address, clientes_conectados, lock,timeout))
             thread.start()
             
     except (socket.error, Exception) as e:
         print(f"Erro ao iniciar o servidor: {e}")
 
-def thread_cliente(client_socket, client_address, clientes_conectados, lock):
+
+def thread_cliente(client_socket, client_address, clientes_conectados, lock,timeout):
     #client_socket, client_address = socket_server.accept()
     """Função que lida com cada cliente em uma nova thread."""
     cliente_conectado = checar_conexao(client_socket, clientes_conectados, lock)
@@ -190,14 +193,22 @@ def thread_cliente(client_socket, client_address, clientes_conectados, lock):
         print(dados)
         clientes = carregar_clientes()
         trechos_viagem = carregar_trechos()
-
+    
+    last_activity = time.time()
     # Recebendo dados de login:
     try:
+        
         # Inicia o loop de comunicação com o cliente 
         while True:
             if(cliente_conectado is None):
                 break
+
+            if time.time() - last_activity > timeout:
+                    client_socket.sendall(pickle.dumps("timeout"))
+                    break
+            
             try:
+           
                 data = client_socket.recv(4096)
                 if not data:
                     break
@@ -218,14 +229,23 @@ def thread_cliente(client_socket, client_address, clientes_conectados, lock):
                     new_obj = busca_possibilidades(trechos_viagem, cidade1, cidade2)
                 elif obj == "trechos_cliente":
                     new_obj = trechos_cliente(cliente_conectado)
-                elif obj == "saida":
+                elif obj == "saida" or obj == "timeout":
                     break
+
+
+                
+
                 data_send = pickle.dumps(new_obj)
                 client_socket.sendall(data_send)
+                last_activity = time.time()
+
+            
+                
 
             except (pickle.PickleError, socket.error) as e:
                 print(f"Erro na comunicação: {e}")
                 break
+            
             with lock:
                 dados = carregar_json(caminho_arquivo)
             clientes = carregar_clientes()
