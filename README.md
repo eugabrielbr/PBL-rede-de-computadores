@@ -82,7 +82,7 @@ A solução desenvolvida segue o modelo clássico de comunicação cliente-servi
   <li>Manter um controle melhor de um usuário durante toda a execução da aplicação</li>
   <li>Mais intuitivo, já que os dados de cada entidade são mantidos independente de uma nova requisição</li>
   <li>Reduz a necessidade de enviar informações repetitivas, já que na implementação atual muitas trocas de informações são feitas na interação cliente-servidor</li>
-  <li>Se por acaso o cliente desconectar, mas tenha conseguido ao menos efetuar a compra, ela ficará salva e visível para o cliente em uma próxima conexão (SE DIOGO IMPLEMENTAR NE)  
+  <li>Se por acaso o cliente desconectar, mas tenha conseguido ao menos efetuar a compra, ela ficará salva e visível para o cliente em uma próxima conexão. 
 </li>
 </ul>
 
