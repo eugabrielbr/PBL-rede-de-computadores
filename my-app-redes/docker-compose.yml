@@ -27,4 +27,5 @@ services:
     tty: true
 
 networks:
-  mynetwork:
+   mynetwork:
+     driver: bridge

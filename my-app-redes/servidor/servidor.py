@@ -217,7 +217,7 @@ def busca_possibilidades(grafo, origem, destino):
 
 # o timeout do servidor serve somente para garantir q o cliente se desconecte em envio muito demorado de pacotes, evitando sobrecarga
 # por isso seu timer é de 100s
-def start_server(host='localhost', port=8080, timeout = 120):
+def start_server(host=socket.gethostbyname(socket.gethostname()), port=4000, timeout = 120):
     """Inicia o servidor para aceitar conexões de clientes e processar dados."""
     lock = threading.Lock()
     clientes_conectados = inicializar_clientes()

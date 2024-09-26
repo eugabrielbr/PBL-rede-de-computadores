@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expor a porta que o servidor usa
-EXPOSE 1080
+EXPOSE 4000
 
 # Comando para rodar o servidor
-
+CMD ["python3", "servidor.py"]

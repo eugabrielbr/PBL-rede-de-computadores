@@ -30,7 +30,7 @@ class Cliente:
             'trechos': self.trechos
         }
 
-def start_client(host='localhost', port=8080):
+def start_client(host='localhost', port=4000):
     """Cria e conecta o socket do cliente."""
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
